@@ -17,18 +17,23 @@ datasource db {
 model Set {
   id        Int      @id @default(autoincrement())
   title     String   @db.VarChar(255)
-  status    Status   @default(OPEN)
-  steps     Step[] // Добавлена реляция с множеством шагов
+  status    Status   @default(EMPTY)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  User      User?    @relation(fields: [userId], references: [id])
-  userId    Int?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  steps Step[]
+
+  @@unique([userId, title])
 }
 
 enum Status {
-  OPEN
-  STARTED
-  CLOSED
+  EMPTY
+  DRAFT
+  UNDER_REVIEW
+  COMPLETED
 }
 
 model Step {
@@ -39,13 +44,15 @@ model Step {
   description  String?  @db.Text
   order        Int
   elementId    String
-  imageUrl     String
-  imageChecked Boolean
-  imageHeight  Int
-  imageWidth   Int
+  imageUrl     String?
+  imageChecked Boolean  @default(false)
+  imageHeight  Int?
+  imageWidth   Int?
   pageUrl      String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([setId])
 }
 
 model User {
@@ -57,11 +64,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Set Set[]
+  sets Set[]
 }
 
 enum Role {
   ADMIN
-  TECH
   USER
 }

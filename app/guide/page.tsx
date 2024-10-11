@@ -1,9 +1,15 @@
-interface Props {
-	className?: string;
-}
+// app/guide/page.tsx
 
-const Guide = ({ className }: Props) => {
-	return <div className={className}>guide</div>;
+import React from 'react';
+import GuideSets from './(sets)';
+
+const GuidePage = async () => {
+	return (
+		<main>
+			<h1>Доступные сеты</h1>
+			<GuideSets />
+		</main>
+	);
 };
 
-export default Guide;
+export default GuidePage;
