@@ -1,14 +1,9 @@
 // app/guide/page.tsx
 
 import React from 'react';
-import GuideSets from './(sets)';
 
 const GuidePage = async () => {
-	return (
-		<main>
-			<GuideSets />
-		</main>
-	);
+	return <main></main>;
 };
 
 export default GuidePage;

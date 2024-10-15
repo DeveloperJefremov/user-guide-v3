@@ -32,3 +32,35 @@ export async function createSet(data: CreateSetInput) {
 
 	return newSet;
 }
+
+export async function deleteSet(setId: number) {
+	try {
+		await prisma.set.delete({
+			where: { id: setId },
+		});
+	} catch (error) {
+		throw new Error('Не удалось удалить сет');
+	}
+}
+
+// Обновление существующего сета
+export async function updateSet(setId: number, data: CreateSetInput) {
+	const parsedData = createSetSchema.safeParse(data);
+
+	if (!parsedData.success) {
+		throw new Error(parsedData.error.errors.map(e => e.message).join(', '));
+	}
+
+	try {
+		const updatedSet = await prisma.set.update({
+			where: { id: setId },
+			data: {
+				title: parsedData.data.title,
+				// Добавьте другие поля, если необходимо
+			},
+		});
+		return updatedSet;
+	} catch (error) {
+		throw new Error('Не удалось обновить сет');
+	}
+}

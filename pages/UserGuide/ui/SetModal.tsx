@@ -7,22 +7,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Set } from '@prisma/client';
 import React, { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { createSet } from '../actions/set';
+import { createSet, updateSet } from '../data/set';
 
-interface AddSetModalProps {
+interface SetModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onSetCreated: (newSet: Set) => void;
+	onSetUpdated: (updatedSet: Set) => void;
+	initialData?: Set | null;
 }
 
-export function AddSetModal({
+export function SetModal({
 	isOpen,
 	onClose,
 	onSetCreated,
-}: AddSetModalProps) {
+	onSetUpdated,
+	initialData,
+}: SetModalProps) {
+	const isEditing = Boolean(initialData);
+	const localStorageKey = isEditing
+		? `editSetTitle_${initialData?.id}`
+		: 'newSetTitle';
+
 	const [titleValue, setTitleValue, removeTitleValue] = useLocalStorage<string>(
-		'newSetTitle',
-		''
+		localStorageKey,
+		initialData?.title || ''
 	);
 
 	const {
@@ -43,14 +52,28 @@ export function AddSetModal({
 		reset({ title: titleValue });
 	}, [titleValue, reset]);
 
+	useEffect(() => {
+		if (isOpen && modalContentRef.current) {
+			const input = modalContentRef.current.querySelector('input');
+			if (input) {
+				(input as HTMLElement).focus();
+			}
+		}
+	}, [isOpen]);
+
 	const onSubmit = async (data: CreateSetInput) => {
 		try {
-			const newSet = await createSet(data);
-			onSetCreated(newSet);
+			if (isEditing && initialData) {
+				const updatedSet = await updateSet(initialData.id, data);
+				onSetUpdated(updatedSet);
+			} else {
+				const newSet = await createSet(data);
+				onSetCreated(newSet);
+			}
 			removeTitleValue();
 			onClose();
 		} catch (error) {
-			console.error('Error creating set:', error);
+			console.error('Error creating/updating set:', error);
 		}
 	};
 
@@ -78,13 +101,18 @@ export function AddSetModal({
 		<div
 			className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'
 			onClick={handleOverlayClick}
+			aria-modal='true'
+			role='dialog'
+			aria-labelledby='modal-title'
 		>
 			<div
 				className='bg-white p-8 rounded-lg max-w-lg w-full'
 				ref={modalContentRef}
 				onClick={e => e.stopPropagation()}
 			>
-				<h2 className='text-2xl font-bold mb-6'>Add New Tutorial</h2>
+				<h2 className='text-2xl font-bold mb-6'>
+					{isEditing ? 'Edit Tutorial' : 'Add New Tutorial'}
+				</h2>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<div className='mb-6'>
 						<label
@@ -116,7 +144,7 @@ export function AddSetModal({
 						>
 							Cancel
 						</Button>
-						<Button type='submit'>Create</Button>
+						<Button type='submit'>{isEditing ? 'Update' : 'Create'}</Button>
 					</div>
 				</form>
 			</div>
