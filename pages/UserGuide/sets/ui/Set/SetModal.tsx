@@ -1,13 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
 import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Set } from '@prisma/client';
 import React, { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { createSet, updateSet } from '../data/set';
+import { createSet, updateSet } from '../../data/set';
 
 interface SetModalProps {
 	isOpen: boolean;
@@ -121,7 +122,7 @@ export function SetModal({
 						>
 							Title
 						</label>
-						<input
+						<Input
 							id='title'
 							type='text'
 							{...register('title')}

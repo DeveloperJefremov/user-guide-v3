@@ -6,10 +6,14 @@ import { prisma } from '@/prisma/prisma-client';
 export async function getGuideSets() {
 	const sets = await prisma.set.findMany({
 		where: {
-			status: 'EMPTY', // Или другой статус, который вы хотите получить
+			status: { in: ['EMPTY', 'DRAFT', 'UNDER_REVIEW', 'COMPLETED'] },
 		},
 		include: {
-			steps: true, // Если вам нужны связанные шаги
+			steps: {
+				orderBy: {
+					order: 'asc', // Упорядочиваем степы по полю `order`
+				},
+			}, // Если вам нужны связанные шаги
 		},
 	});
 	return sets;

@@ -5,8 +5,8 @@ import { Set } from '@prisma/client';
 import { Reorder } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { deleteSet, getGuideSets, updateSet } from './data/set';
-import { GuideSet } from './ui/GuideSet';
-import { SetModal } from './ui/SetModal';
+import { GuideSet } from './ui/Set/GuideSet';
+import { SetModal } from './ui/Set/SetModal';
 
 export const GuideSetList = () => {
 	const [sets, setSets] = useState<Set[]>([]);

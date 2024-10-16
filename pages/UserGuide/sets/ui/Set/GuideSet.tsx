@@ -1,7 +1,9 @@
 import { Set, Status } from '@prisma/client';
 import { useState } from 'react';
+
 import { SetFooter } from './SetFooter';
 import { SetHeader } from './SetHeader';
+import { GuideStepsList } from './Step/GuideStepList';
 
 interface GuideSetProps {
 	set: Set;
@@ -54,7 +56,7 @@ export const GuideSet = ({
 						isExpanded ? 'max-h-screen' : 'max-h-0 overflow-hidden'
 					}`}
 				>
-					<p>Status: {set.status}</p>
+					<GuideStepsList setId={set.id} />
 					<SetFooter />
 				</div>
 			</div>
