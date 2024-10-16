@@ -1,6 +1,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
@@ -9,7 +16,7 @@ import { createStep } from '@/pages/UserGuide/sets/data/step';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Step } from '@prisma/client';
 import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 interface StepModalProps {
 	setId: number;
@@ -37,18 +44,20 @@ export const StepModal = ({
 			imageHeight: 1,
 			imageWidth: 1,
 			pageUrl: '',
-			setId: setId, // Не забудьте передать правильное значение
+			setId: setId,
 		});
 
-	const {
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	} = useForm<CreateStepInput>({
+	const methods = useForm<CreateStepInput>({
 		resolver: zodResolver(createStepSchema),
 		defaultValues: stepData,
 	});
+
+	const {
+		handleSubmit,
+		reset,
+		control,
+		formState: { errors },
+	} = methods;
 
 	const [loading, setLoading] = useState(false);
 	const modalContentRef = useRef<HTMLDivElement>(null);
@@ -69,7 +78,6 @@ export const StepModal = ({
 	const onSubmit = async (data: CreateStepInput) => {
 		setLoading(true);
 		try {
-			// Добавляем setId в данные, отправляемые на сервер
 			const newStep = await createStep({ ...data, setId });
 			onStepCreated(newStep);
 			removeStepData();
@@ -93,14 +101,6 @@ export const StepModal = ({
 
 	if (!isOpen) return null;
 
-	// Указываем тип для prevData, чтобы избежать ошибок с any
-	const handleFieldChange = (field: keyof CreateStepInput, value: any) => {
-		setStepData({
-			...stepData,
-			[field]: value,
-		});
-	};
-
 	return (
 		<div
 			className='fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center'
@@ -114,142 +114,166 @@ export const StepModal = ({
 				onClick={e => e.stopPropagation()}
 			>
 				<h2 className='text-xl font-bold mb-4'>Add New Step</h2>
-				<form onSubmit={handleSubmit(onSubmit)}>
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Title</label>
-						<Input
-							{...register('title')}
-							value={stepData.title}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('title', e.target.value)
-							}
-							placeholder='Enter step title'
+				<FormProvider {...methods}>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<FormField
+							name='title'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Title</FormLabel>
+									<FormControl>
+										<Input {...field} placeholder='Enter step title' />
+									</FormControl>
+									{errors.title && (
+										<FormMessage>{errors.title.message}</FormMessage>
+									)}
+								</FormItem>
+							)}
 						/>
-						{errors.title && (
-							<p className='text-red-500'>{errors.title.message}</p>
-						)}
-					</div>
 
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Description</label>
-						<Textarea
-							{...register('description')}
-							value={stepData.description}
-							onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-								handleFieldChange('description', e.target.value)
-							}
-							placeholder='Enter step description'
+						<FormField
+							name='description'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Description</FormLabel>
+									<FormControl>
+										<Textarea {...field} placeholder='Enter step description' />
+									</FormControl>
+									{errors.description && (
+										<FormMessage>{errors.description.message}</FormMessage>
+									)}
+								</FormItem>
+							)}
 						/>
-						{errors.description && (
-							<p className='text-red-500'>{errors.description.message}</p>
-						)}
-					</div>
 
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Order</label>
-						<Input
-							type='number'
-							{...register('order', { valueAsNumber: true })}
-							value={stepData.order}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('order', Number(e.target.value))
-							}
-							placeholder='Enter step order'
+						<FormField
+							name='order'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Order</FormLabel>
+									<FormControl>
+										<Input
+											type='number'
+											{...field}
+											placeholder='Enter step order'
+										/>
+									</FormControl>
+									{errors.order && (
+										<FormMessage>{errors.order.message}</FormMessage>
+									)}
+								</FormItem>
+							)}
 						/>
-						{errors.order && (
-							<p className='text-red-500'>{errors.order.message}</p>
-						)}
-					</div>
 
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Element ID</label>
-						<Input
-							{...register('elementId')}
-							value={stepData.elementId}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('elementId', e.target.value)
-							}
-							placeholder='Enter element ID'
+						<FormField
+							name='elementId'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Element ID</FormLabel>
+									<FormControl>
+										<Input {...field} placeholder='Enter element ID' />
+									</FormControl>
+									{errors.elementId && (
+										<FormMessage>{errors.elementId.message}</FormMessage>
+									)}
+								</FormItem>
+							)}
 						/>
-						{errors.elementId && (
-							<p className='text-red-500'>{errors.elementId.message}</p>
-						)}
-					</div>
 
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Page URL</label>
-						<Input
-							{...register('pageUrl')}
-							value={stepData.pageUrl}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('pageUrl', e.target.value)
-							}
-							placeholder='Enter page URL'
+						<FormField
+							name='pageUrl'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Page URL</FormLabel>
+									<FormControl>
+										<Input {...field} placeholder='Enter page URL' />
+									</FormControl>
+									{errors.pageUrl && (
+										<FormMessage>{errors.pageUrl.message}</FormMessage>
+									)}
+								</FormItem>
+							)}
 						/>
-						{errors.pageUrl && (
-							<p className='text-red-500'>{errors.pageUrl.message}</p>
-						)}
-					</div>
 
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Image URL</label>
-						<Input
-							{...register('imageUrl')}
-							value={stepData.imageUrl || ''}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('imageUrl', e.target.value)
-							}
-							placeholder='Enter image URL'
+						<FormField
+							name='imageUrl'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Image URL</FormLabel>
+									<FormControl>
+										<Input {...field} placeholder='Enter image URL' />
+									</FormControl>
+								</FormItem>
+							)}
 						/>
-					</div>
 
-					<div className='flex items-center mb-4'>
-						<label className='mr-2'>Image Checked</label>
-						<input
-							type='checkbox'
-							{...register('imageChecked')}
-							checked={stepData.imageChecked}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('imageChecked', e.target.checked)
-							}
+						<FormField
+							name='imageChecked'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Image Checked</FormLabel>
+									<FormControl>
+										<input
+											type='checkbox'
+											checked={field.value}
+											onChange={field.onChange}
+											ref={field.ref}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
 						/>
-					</div>
-
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Image Height</label>
-						<Input
-							type='number'
-							{...register('imageHeight')}
-							value={stepData.imageHeight || ''}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('imageHeight', Number(e.target.value))
-							}
-							placeholder='Enter image height'
+						<FormField
+							name='imageHeight'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Image Height</FormLabel>
+									<FormControl>
+										<Input
+											type='number'
+											{...field}
+											placeholder='Enter image height'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
 						/>
-					</div>
 
-					<div className='mb-4'>
-						<label className='block text-sm font-medium'>Image Width</label>
-						<Input
-							type='number'
-							{...register('imageWidth')}
-							value={stepData.imageWidth || ''}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								handleFieldChange('imageWidth', Number(e.target.value))
-							}
-							placeholder='Enter image width'
+						<FormField
+							name='imageWidth'
+							control={control}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Image Width</FormLabel>
+									<FormControl>
+										<Input
+											type='number'
+											{...field}
+											placeholder='Enter image width'
+										/>
+									</FormControl>
+								</FormItem>
+							)}
 						/>
-					</div>
 
-					<div className='flex justify-end'>
-						<Button variant='ghost' onClick={onClose}>
-							Cancel
-						</Button>
-						<Button type='submit' className='ml-4' disabled={loading}>
-							{loading ? 'Adding...' : 'Add Step'}
-						</Button>
-					</div>
-				</form>
+						<div className='flex justify-end'>
+							<Button variant='ghost' onClick={onClose}>
+								Cancel
+							</Button>
+							<Button type='submit' className='ml-4' disabled={loading}>
+								{loading ? 'Adding...' : 'Add Step'}
+							</Button>
+						</div>
+					</form>
+				</FormProvider>
 			</div>
 		</div>
 	);

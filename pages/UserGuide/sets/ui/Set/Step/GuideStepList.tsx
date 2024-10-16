@@ -44,7 +44,7 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 			</div>
 
 			{steps.length === 0 ? (
-				<p className='text-gray-500'>No steps available.</p>
+				<p>No steps available.</p>
 			) : (
 				<ul className='space-y-4'>
 					{steps.map(step => (
