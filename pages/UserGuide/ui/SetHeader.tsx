@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Set, Status } from '@prisma/client';
+import { MinusIcon, PlusIcon } from 'lucide-react';
 import React from 'react';
 import { StatusSelector } from './StatusSelector';
 
@@ -10,6 +11,8 @@ interface SetHeaderProps {
 	onDelete: (id: number) => void;
 	onEdit: (set: Set) => void;
 	onChangeStatus?: (id: number, newStatus: Status) => void; // Опциональный коллбек для изменения статуса
+	isExpanded: boolean;
+	onToggleExpand: () => void;
 }
 
 export const SetHeader = ({
@@ -19,13 +22,15 @@ export const SetHeader = ({
 	onDelete,
 	onEdit,
 	onChangeStatus,
+	isExpanded,
+	onToggleExpand,
 }: SetHeaderProps) => {
 	const handleEdit = () => {
 		onEdit({
 			id: setId,
 			title: setTitle,
 			status: status,
-			createdAt: new Date(), // Используйте реальные данные
+			createdAt: new Date(),
 			updatedAt: new Date(),
 			userId: 1, // Замените на актуальный userId
 			// steps: [],
@@ -53,6 +58,17 @@ export const SetHeader = ({
 				</Button>
 				<Button variant='destructive' onClick={() => onDelete(setId)}>
 					Delete
+				</Button>
+				<Button
+					variant='ghost'
+					onClick={onToggleExpand}
+					aria-label={isExpanded ? 'Collapse set' : 'Expand set'}
+				>
+					{isExpanded ? (
+						<MinusIcon className='w-5 h-5' />
+					) : (
+						<PlusIcon className='w-5 h-5' />
+					)}
 				</Button>
 			</div>
 		</header>

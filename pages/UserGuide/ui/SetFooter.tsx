@@ -1,13 +1,12 @@
 // components/Footer.tsx
 
+import { Button } from '@/components/ui/button';
 import React from 'react';
 
 export const SetFooter = () => {
 	return (
 		<footer className='border-t  p-4 mt-4'>
-			<p className='text-center'>
-				© {new Date().getFullYear()} Ваше приложение
-			</p>
+			<Button>Launch Tutorial</Button>
 		</footer>
 	);
 };

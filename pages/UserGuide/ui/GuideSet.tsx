@@ -1,4 +1,5 @@
 import { Set, Status } from '@prisma/client';
+import { useState } from 'react';
 import { SetFooter } from './SetFooter';
 import { SetHeader } from './SetHeader';
 
@@ -15,6 +16,8 @@ export const GuideSet = ({
 	onEdit,
 	onChangeStatus,
 }: GuideSetProps) => {
+	const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
 	const handleDelete = () => {
 		onDelete(set.id);
 	};
@@ -29,6 +32,9 @@ export const GuideSet = ({
 		}
 		// Дополнительная логика при необходимости
 	};
+	const toggleExpand = () => {
+		setIsExpanded(prev => !prev);
+	};
 
 	return (
 		<div>
@@ -40,11 +46,17 @@ export const GuideSet = ({
 					onDelete={handleDelete}
 					onEdit={handleEdit}
 					onChangeStatus={handleStatusChange}
+					isExpanded={isExpanded}
+					onToggleExpand={toggleExpand}
 				/>
-
-				<p>Status: {set.status}</p>
-
-				<SetFooter />
+				<div
+					className={`transition-all duration-300 ease-in-out ${
+						isExpanded ? 'max-h-screen' : 'max-h-0 overflow-hidden'
+					}`}
+				>
+					<p>Status: {set.status}</p>
+					<SetFooter />
+				</div>
 			</div>
 		</div>
 	);

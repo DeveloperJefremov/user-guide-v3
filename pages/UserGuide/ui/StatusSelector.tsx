@@ -17,10 +17,10 @@ interface StatusSelectorProps {
 	onChangeStatus: (newStatus: Status) => void;
 }
 
-export const StatusSelector: React.FC<StatusSelectorProps> = ({
+export const StatusSelector = ({
 	currentStatus,
 	onChangeStatus,
-}) => {
+}: StatusSelectorProps): JSX.Element => {
 	const [status, setStatus] = useState<Status>(currentStatus);
 	const [isToggleOn, setIsToggleOn] = useState<boolean>(false);
 
@@ -60,7 +60,9 @@ export const StatusSelector: React.FC<StatusSelectorProps> = ({
 					size='sm'
 					className={cn(
 						'ml-2',
-						isToggleOn ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+						isToggleOn
+							? 'bg-green-500 hover:bg-green-500 text-white'
+							: 'bg-gray-200 text-gray-700'
 					)}
 					onClick={handleToggleClick}
 				>
