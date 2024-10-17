@@ -22,20 +22,25 @@ export async function createStep(data: CreateStepInput) {
 		throw new Error(parsedData.error.errors.map(e => e.message).join(', '));
 	}
 
-	const newStep = await prisma.step.create({
-		data: {
-			title: parsedData.data.title,
-			description: parsedData.data.description,
-			order: parsedData.data.order,
-			setId: parsedData.data.setId,
-			elementId: parsedData.data.elementId,
-			imageUrl: parsedData.data.imageUrl ?? '',
-			imageChecked: parsedData.data.imageChecked,
-			imageHeight: parsedData.data.imageHeight,
-			imageWidth: parsedData.data.imageWidth,
-			pageUrl: parsedData.data.pageUrl,
-		},
-	});
-
-	return newStep;
+	try {
+		const newStep = await prisma.step.create({
+			data: {
+				title: parsedData.data.title,
+				description: parsedData.data.description,
+				order: parsedData.data.order,
+				setId: parsedData.data.setId,
+				elementId: parsedData.data.elementId,
+				imageUrl: parsedData.data.imageUrl ?? '', // Дефолтное значение
+				imageChecked: parsedData.data.imageChecked,
+				imageHeight: parsedData.data.imageHeight,
+				imageWidth: parsedData.data.imageWidth,
+				pageUrl: parsedData.data.pageUrl,
+			},
+		});
+		return newStep;
+	} catch (error) {
+		// Логирование ошибок для упрощенной отладки
+		console.error('Ошибка при создании шага:', error);
+		throw new Error('Ошибка при создании шага в базе данных');
+	}
 }
