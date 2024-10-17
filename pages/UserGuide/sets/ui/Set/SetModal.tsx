@@ -1,13 +1,20 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
 import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Set } from '@prisma/client';
 import React, { useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { createSet, updateSet } from '../../data/set';
 
 interface SetModalProps {
@@ -35,17 +42,19 @@ export function SetModal({
 		initialData?.title || ''
 	);
 
-	const {
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	} = useForm<CreateSetInput>({
+	const methods = useForm<CreateSetInput>({
 		resolver: zodResolver(createSetSchema),
 		defaultValues: {
 			title: titleValue,
 		},
 	});
+
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors },
+	} = methods;
 
 	const modalContentRef = useRef<HTMLDivElement>(null);
 
@@ -107,47 +116,54 @@ export function SetModal({
 			aria-labelledby='modal-title'
 		>
 			<div
-				className='bg-white p-8 rounded-lg max-w-lg w-full'
+				className='bg-white p-8 rounded-lg max-w-lg w-full shadow-md'
 				ref={modalContentRef}
 				onClick={e => e.stopPropagation()}
 			>
 				<h2 className='text-2xl font-bold mb-6'>
 					{isEditing ? 'Edit Tutorial' : 'Add New Tutorial'}
 				</h2>
-				<form onSubmit={handleSubmit(onSubmit)}>
-					<div className='mb-6'>
-						<label
-							htmlFor='title'
-							className='block text-base font-medium text-gray-700'
-						>
-							Title
-						</label>
-						<Input
-							id='title'
-							type='text'
-							{...register('title')}
-							value={titleValue}
-							onChange={handleTitleChange}
-							className='mt-2 block w-full border border-gray-300 rounded-md p-3 text-lg'
+				{/* Добавляем FormProvider */}
+				<FormProvider {...methods}>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<Controller
+							name='title'
+							control={control}
+							render={({ field }) => (
+								<FormItem className='mb-6'>
+									<FormLabel>Title</FormLabel>
+									<FormControl>
+										<Input
+											id='title'
+											type='text'
+											{...field}
+											value={titleValue}
+											onChange={handleTitleChange}
+											className='mt-2'
+										/>
+									</FormControl>
+									{errors.title && (
+										<FormMessage className='text-red-500 text-sm mt-2'>
+											{(errors.title as any).message}
+										</FormMessage>
+									)}
+								</FormItem>
+							)}
 						/>
-						{errors.title && (
-							<p className='text-red-500 text-sm mt-2'>
-								{(errors.title as any).message}
-							</p>
-						)}
-					</div>
-					<div className='flex justify-end'>
-						<Button
-							type='button'
-							variant='secondary'
-							onClick={onClearStorageClose}
-							className='mr-4'
-						>
-							Cancel
-						</Button>
-						<Button type='submit'>{isEditing ? 'Update' : 'Create'}</Button>
-					</div>
-				</form>
+
+						<div className='flex justify-end'>
+							<Button
+								type='button'
+								variant='outline'
+								onClick={onClearStorageClose}
+								className='mr-4'
+							>
+								Cancel
+							</Button>
+							<Button type='submit'>{isEditing ? 'Update' : 'Create'}</Button>
+						</div>
+					</form>
+				</FormProvider>
 			</div>
 		</div>
 	);

@@ -5,7 +5,7 @@ import React from 'react';
 
 export const SetFooter = () => {
 	return (
-		<footer className='border-t  p-4 mt-4'>
+		<footer className='  p-4 mt-4'>
 			<Button>Launch Tutorial</Button>
 		</footer>
 	);

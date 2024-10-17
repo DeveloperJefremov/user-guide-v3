@@ -3,14 +3,15 @@ import { z } from 'zod';
 // Определяем схему для шага
 export const createStepSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
-	description: z.string().optional(),
-	order: z.number().min(0, 'Order is required'),
+	description: z.string().min(1, 'Description is required'),
+	order: z.number().min(1, 'Order is required'),
 	setId: z.number(),
-	elementId: z.string(),
-	imageUrl: z.string().optional(),
-	imageChecked: z.boolean().default(false),
-	imageHeight: z.number().optional(),
-	imageWidth: z.number().optional(),
+	elementId: z.string().min(1, 'Element ID is required'),
+	imageUrl: z.string().url('Invalid URL format').optional(),
+
+	imageChecked: z.boolean(),
+	imageHeight: z.number().min(1, 'Image height is required').optional(),
+	imageWidth: z.number().min(1, 'Image width is required').optional(),
 	pageUrl: z.string().url('Invalid URL format'),
 });
 

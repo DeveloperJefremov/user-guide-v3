@@ -29,7 +29,7 @@ export async function createStep(data: CreateStepInput) {
 			order: parsedData.data.order,
 			setId: parsedData.data.setId,
 			elementId: parsedData.data.elementId,
-			imageUrl: parsedData.data.imageUrl,
+			imageUrl: parsedData.data.imageUrl ?? '',
 			imageChecked: parsedData.data.imageChecked,
 			imageHeight: parsedData.data.imageHeight,
 			imageWidth: parsedData.data.imageWidth,

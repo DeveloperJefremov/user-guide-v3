@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button'
-import { Set, Status } from '@prisma/client'
-import { MinusIcon, PlusIcon } from 'lucide-react'
-import React from 'react'
-import { StatusSelector } from './StatusSelector'
+import { Button } from '@/components/ui/button';
+import { Set, Status } from '@prisma/client';
+import { MinusIcon, PlusIcon } from 'lucide-react';
+import React from 'react';
+import { StatusSelector } from './StatusSelector';
 
 interface SetHeaderProps {
 	setTitle: string;
@@ -44,7 +44,7 @@ export const SetHeader = ({
 	};
 
 	return (
-		<header className='border-b p-4 flex justify-between items-center'>
+		<header className=' p-4 flex justify-between items-center'>
 			<div className='flex items-center'>
 				<h2 className='text-xl font-bold'>{setTitle}</h2>
 				<StatusSelector

@@ -39,6 +39,8 @@ export const GuideSetList = () => {
 		setSets(prevSets => prevSets.filter(set => set.id !== setId));
 		try {
 			await deleteSet(setId);
+			// Удаляем сохраненные данные для этого сета из localStorage
+			localStorage.removeItem(`editSetTitle_${setId}`);
 		} catch (error) {
 			setSets(previousSets);
 			console.error('Ошибка при удалении сета:', error);
@@ -59,7 +61,7 @@ export const GuideSetList = () => {
 	};
 
 	return (
-		<div>
+		<div className='border m-8 overflow-auto'>
 			<div className='flex justify-between items-center'>
 				<h1>Tutorial List:</h1>
 				<Button onClick={() => setIsModalOpen(true)}>Add Tutorial</Button>

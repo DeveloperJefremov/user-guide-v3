@@ -34,7 +34,7 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 	return (
 		<div className='mt-4'>
 			<div className='flex justify-between items-center mb-2'>
-				<h3 className='text-lg font-semibold'>Steps:</h3>
+				<h3 className='text-lg font-semibold'>Guide Steps List:</h3>
 				<Button
 					className=' text-white px-4 py-2 rounded-md'
 					onClick={() => setIsModalOpen(true)}
