@@ -14,8 +14,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang='en'>
-			<body>{children}</body>
-			<div id='modal-root'></div>
+			<body>
+				{children}
+				<div id='modal-root'></div> {/* Контейнер для модальных окон */}
+			</body>
 		</html>
 	);
 }
