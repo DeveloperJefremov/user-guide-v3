@@ -44,3 +44,13 @@ export async function createStep(data: CreateStepInput) {
 		throw new Error('Ошибка при создании шага в базе данных');
 	}
 }
+
+export async function deleteStep(stepId: number) {
+	try {
+		await prisma.step.delete({
+			where: { id: stepId },
+		});
+	} catch (error) {
+		throw new Error('Не удалось удалить шаг');
+	}
+}

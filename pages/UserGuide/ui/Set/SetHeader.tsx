@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button'
-import { Set, Status } from '@prisma/client'
-import { MinusIcon, PlusIcon } from 'lucide-react'
-import React from 'react'
-import { StatusSelector } from './StatusSelector'
+import { Button } from '@/components/ui/button';
+import { Set, Status } from '@prisma/client';
+import { MinusIcon, PlusIcon } from 'lucide-react';
+import React from 'react';
+import { StatusSelector } from './StatusSelector';
 
 interface SetHeaderProps {
 	setTitle: string;

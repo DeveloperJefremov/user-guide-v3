@@ -1,11 +1,11 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Step } from '@prisma/client';
-import React, { useEffect, useState } from 'react';
-import { getStepsBySetId } from '../../../data/step';
-import { GuideStep } from './GuideStep';
-import { StepModal } from './StepModal';
+import { Button } from '@/components/ui/button'
+import { Step } from '@prisma/client'
+import React, { useEffect, useState } from 'react'
+import { deleteStep, getStepsBySetId } from '../../../data/step'
+import { GuideStep } from './GuideStep'
+import { StepModal } from './StepModal'
 
 export const GuideStepsList = ({ setId }: { setId: number }) => {
 	const [steps, setSteps] = useState<Step[]>([]);
@@ -31,6 +31,17 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 		setSteps(prevSteps => [...prevSteps, newStep]); // Обновляем список шагов
 	};
 
+	const handleStepDeleted = async (stepId: number) => {
+		try {
+			// Удаляем шаг из базы данных
+			await deleteStep(stepId);
+			// Обновляем состояние, удаляя шаг из UI
+			setSteps(prevSteps => prevSteps.filter(step => step.id !== stepId));
+		} catch (error) {
+			console.error('Ошибка при удалении шага:', error);
+		}
+	};
+
 	return (
 		<div className='mt-4'>
 			<div className='flex justify-between items-center mb-2'>
@@ -49,7 +60,7 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 				<ul className='space-y-4'>
 					{steps.map(step => (
 						<li key={step.id} className='border p-4 rounded-lg shadow-sm'>
-							<GuideStep step={step} />
+							<GuideStep step={step} onStepDeleted={handleStepDeleted} />
 						</li>
 					))}
 				</ul>
