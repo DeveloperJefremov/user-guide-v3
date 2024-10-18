@@ -1,12 +1,12 @@
 'use client';
 
-import { Button } from '@/components/ui/button'
-import { Set } from '@prisma/client'
-import { Reorder } from 'framer-motion'
-import { useEffect, useState } from 'react'
-import { deleteSet, getGuideSets, updateSet } from './data/set'
-import { GuideSet } from './ui/Set/GuideSet'
-import { SetModal } from './ui/Set/SetModal'
+import { Button } from '@/components/ui/button';
+import { Set } from '@prisma/client';
+import { Reorder } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { deleteSet, getGuideSets, updateSet } from './data/set';
+import { GuideSet } from './ui/Set/GuideSet';
+import { SetModal } from './ui/Set/SetModal';
 
 export const GuideSetList = () => {
 	const [sets, setSets] = useState<Set[]>([]);
@@ -71,14 +71,12 @@ export const GuideSetList = () => {
 				<Reorder.Group axis='y' values={sets} onReorder={setSets}>
 					{sets.map(set => (
 						<Reorder.Item key={set.id} value={set}>
-							<li>
-								<GuideSet
-									key={set.id}
-									set={set}
-									onDelete={handleDeleteSet}
-									onEdit={handleEditSet}
-								/>
-							</li>
+							<GuideSet
+								key={set.id}
+								set={set}
+								onDelete={handleDeleteSet}
+								onEdit={handleEditSet}
+							/>
 						</Reorder.Item>
 					))}
 				</Reorder.Group>

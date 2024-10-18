@@ -113,12 +113,13 @@ export const StepModal = ({
 		setLoading(true);
 		try {
 			const newStep = await createStep({ ...data, setId });
+
 			onStepCreated(newStep);
-			removeStepData(); // Удаляем данные из localStorage после создания шага
-			onClose(); // Закрываем модальное окно
 			reset();
+			removeStepData();
+			onClose();
 		} catch (error) {
-			console.error('Ошибка при создании шага:', error);
+			console.error('Error creating/updating step:', error);
 		} finally {
 			setLoading(false);
 		}
