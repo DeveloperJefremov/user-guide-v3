@@ -1,14 +1,15 @@
 import { Set, Status } from '@prisma/client';
 import { useState } from 'react';
 
+import { SetWithSteps } from '@/lib/types/types';
 import { SetFooter } from './SetFooter';
 import { SetHeader } from './SetHeader';
 import { GuideStepsList } from './Step/GuideStepList';
 
 interface GuideSetProps {
-	set: Set;
+	set: SetWithSteps;
 	onDelete: (setId: number) => void;
-	onEdit: (set: Set) => void;
+	onEdit: (set: SetWithSteps) => void;
 	onChangeStatus?: (setId: number, newStatus: Status) => void;
 }
 
@@ -56,7 +57,7 @@ export const GuideSet = ({
 						isExpanded ? 'max-h-screen' : 'max-h-0 overflow-hidden'
 					}`}
 				>
-					<GuideStepsList setId={set.id} />
+					<GuideStepsList steps={set.steps} setId={set.id} />
 					<SetFooter />
 				</div>
 			</div>

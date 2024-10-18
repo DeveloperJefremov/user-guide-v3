@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { SetWithSteps } from '@/lib/types/types';
 import { Set } from '@prisma/client';
 import { Reorder } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -9,9 +10,9 @@ import { GuideSet } from './ui/Set/GuideSet';
 import { SetModal } from './ui/Set/SetModal';
 
 export const GuideSetList = () => {
-	const [sets, setSets] = useState<Set[]>([]);
+	const [sets, setSets] = useState<SetWithSteps[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [selectedSet, setSelectedSet] = useState<Set | null>(null);
+	const [selectedSet, setSelectedSet] = useState<SetWithSteps | null>(null);
 
 	async function fetchSets() {
 		try {
@@ -26,7 +27,7 @@ export const GuideSetList = () => {
 		fetchSets();
 	}, []);
 
-	const handleCreateSet = (newSet?: Set) => {
+	const handleCreateSet = (newSet?: SetWithSteps) => {
 		if (newSet) {
 			setSets(prevSets => [...prevSets, newSet]);
 		}
@@ -48,12 +49,12 @@ export const GuideSetList = () => {
 		}
 	};
 
-	const handleEditSet = (set: Set) => {
+	const handleEditSet = (set: SetWithSteps) => {
 		setSelectedSet(set);
 		setIsModalOpen(true);
 	};
 
-	const handleUpdateSet = (updatedSet: Set) => {
+	const handleUpdateSet = (updatedSet: SetWithSteps) => {
 		setSets(prevSets =>
 			prevSets.map(set => (set.id === updatedSet.id ? updatedSet : set))
 		);

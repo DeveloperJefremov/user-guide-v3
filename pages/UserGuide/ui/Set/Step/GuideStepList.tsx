@@ -3,38 +3,40 @@
 import { Button } from '@/components/ui/button';
 import { Step } from '@prisma/client';
 import { Reorder } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
 	deleteStep,
-	getStepsBySetId,
+	// getStepsBySetId,
 	updateStepsOrder,
 } from '../../../data/step';
 import { GuideStep } from './GuideStep';
 import { StepModal } from './StepModal';
 
-export const GuideStepsList = ({ setId }: { setId: number }) => {
-	const [steps, setSteps] = useState<Step[]>([]);
+interface GuideStepsListProps {
+	steps: Step[];
+	setId: number;
+}
+
+export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
+	const [localSteps, setLocalSteps] = useState<Step[]>(steps);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [selectedStep, setSelectedStep] = useState<Step | null>(null);
 
-	useEffect(() => {
-		const fetchSteps = async () => {
-			try {
-				const stepsData = await getStepsBySetId(setId);
-				setSteps(stepsData);
-			} catch (error) {
-				console.error('Ошибка при получении шагов:', error);
-			}
-		};
+	// useEffect(() => {
+	// 	const fetchSteps = async () => {
+	// 		try {
+	// 			const stepsData = await getStepsBySetId(setId);
+	// 			setSteps(stepsData);
+	// 		} catch (error) {
+	// 			console.error('Ошибка при получении шагов:', error);
+	// 		}
+	// 	};
 
-		fetchSteps();
-	}, [setId]);
-	// if (steps.length === 0) {
-	// 	return <p className='text-gray-500'>No steps available.</p>;
-	// }
+	// 	fetchSteps();
+	// }, [setId]);
 
 	const handleStepCreated = (newStep: Step) => {
-		const updatedSteps = steps.map(step => {
+		const updatedSteps = localSteps.map(step => {
 			if (step.order >= newStep.order) {
 				return { ...step, order: step.order + 1 };
 			}
@@ -44,7 +46,7 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 			(a, b) => a.order - b.order
 		);
 
-		setSteps(finalSteps);
+		setLocalSteps(finalSteps);
 
 		try {
 			updateStepsOrder(
@@ -60,14 +62,22 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 		setIsModalOpen(true);
 	};
 
+	const handleStepUpdated = (updatedStep: Step) => {
+		setLocalSteps(prevSteps =>
+			prevSteps.map(step => (step.id === updatedStep.id ? updatedStep : step))
+		);
+		setIsModalOpen(false);
+		setSelectedStep(null);
+	};
+
 	const handleStepDeleted = async (stepId: number) => {
 		try {
 			await deleteStep(stepId);
 
-			const updatedSteps = steps
+			const updatedSteps = localSteps
 				.filter(step => step.id !== stepId)
 				.map((step, index) => ({ ...step, order: index + 1 }));
-			setSteps(updatedSteps);
+			setLocalSteps(updatedSteps);
 
 			await updateStepsOrder(
 				updatedSteps.map(step => ({ id: step.id, order: step.order }))
@@ -82,7 +92,7 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 			...step,
 			order: index + 1,
 		}));
-		setSteps(updatedSteps);
+		setLocalSteps(updatedSteps);
 		try {
 			updatedSteps.map(step => ({ id: step.id, order: step.order }));
 			await updateStepsOrder(
@@ -105,7 +115,7 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 				</Button>
 			</div>
 
-			{steps.length === 0 ? (
+			{localSteps.length === 0 ? (
 				<p>No steps available.</p>
 			) : (
 				<Reorder.Group
@@ -131,13 +141,20 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 					))}
 				</Reorder.Group>
 			)}
-
-			<StepModal
-				setId={setId}
-				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
-				onStepCreated={handleStepCreated}
-			/>
+			{isModalOpen && (
+				<StepModal
+					setId={setId}
+					isOpen={isModalOpen}
+					onClose={() => {
+						setIsModalOpen(false);
+						setSelectedStep(null);
+					}}
+					onStepCreated={handleStepCreated}
+					onStepUpdated={handleStepUpdated}
+					initialData={selectedStep}
+					stepId={selectedStep?.id}
+				/>
+			)}
 		</div>
 	);
 };
