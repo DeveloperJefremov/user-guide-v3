@@ -67,20 +67,19 @@ export const GuideSetList = () => {
 				<h1>Tutorial List:</h1>
 				<Button onClick={() => setIsModalOpen(true)}>Add Tutorial</Button>
 			</div>
-			<ul>
-				<Reorder.Group axis='y' values={sets} onReorder={setSets}>
-					{sets.map(set => (
-						<Reorder.Item key={set.id} value={set}>
-							<GuideSet
-								key={set.id}
-								set={set}
-								onDelete={handleDeleteSet}
-								onEdit={handleEditSet}
-							/>
-						</Reorder.Item>
-					))}
-				</Reorder.Group>
-			</ul>
+
+			<Reorder.Group axis='y' values={sets} onReorder={setSets}>
+				{sets.map(set => (
+					<Reorder.Item key={set.id} value={set}>
+						<GuideSet
+							key={set.id}
+							set={set}
+							onDelete={handleDeleteSet}
+							onEdit={handleEditSet}
+						/>
+					</Reorder.Item>
+				))}
+			</Reorder.Group>
 
 			{isModalOpen && (
 				<SetModal

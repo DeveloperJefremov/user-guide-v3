@@ -7,24 +7,35 @@ import StepHeader from './StepHeader';
 interface GuideStepProps {
 	step: Step;
 	onStepDeleted: (stepId: number) => void;
+	onStepEdited: (step: Step) => void;
 }
 
-export const GuideStep = ({ step, onStepDeleted }: GuideStepProps) => {
+export const GuideStep = ({
+	step,
+	onStepDeleted,
+	onStepEdited,
+}: GuideStepProps) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
 	const toggleExpand = () => {
 		setIsExpanded(prev => !prev);
 	};
 
+	const handleDelete = () => {
+		onStepDeleted(step.id);
+	};
+	const handleEdit = () => {
+		onStepEdited(step); // Передаем шаг для редактирования
+	};
 	return (
 		<div className='mb-4'>
 			<StepHeader
 				title={step.title}
 				order={step.order}
-				stepId={step.id}
 				isExpanded={isExpanded}
 				onToggleExpand={toggleExpand}
-				onStepDeleted={onStepDeleted}
+				onStepDeleted={handleDelete}
+				onStepEdited={handleEdit}
 			/>
 			{/* Скрываем содержимое в свернутом состоянии, убирая padding и отступы */}
 			<div

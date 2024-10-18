@@ -6,22 +6,24 @@ interface StepHeaderProps {
 	title: string;
 	order: number;
 	isExpanded: boolean;
-	stepId: number;
+
 	onToggleExpand: () => void;
-	onStepDeleted: (stepId: number) => void;
+	onStepDeleted: () => void;
+	onStepEdited: () => void;
 }
 
 const StepHeader = ({
 	title,
 	order,
 	isExpanded,
-	stepId,
+
 	onToggleExpand,
 	onStepDeleted,
+	onStepEdited,
 }: StepHeaderProps) => {
-	const handleDelete = () => {
-		onStepDeleted(stepId); // Вызываем коллбэк удаления
-	};
+	// const handleDelete = () => {
+	// 	onStepDeleted(stepId);
+	// };
 
 	return (
 		<div className='mb-4 flex justify-between items-center'>
@@ -30,13 +32,10 @@ const StepHeader = ({
 				<p className='text-gray-500'>Order: {order}</p>
 			</div>
 			<div className='flex space-x-2'>
-				<Button
-					variant='default'
-					//  onClick={handleEdit}
-				>
+				<Button variant='default' onClick={onStepEdited}>
 					Edit
 				</Button>
-				<Button variant='destructive' onClick={handleDelete}>
+				<Button variant='destructive' onClick={onStepDeleted}>
 					Delete
 				</Button>
 				<Button

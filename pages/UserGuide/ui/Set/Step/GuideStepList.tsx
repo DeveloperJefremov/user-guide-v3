@@ -1,15 +1,21 @@
 'use client';
 
-import { Button } from '@/components/ui/button'
-import { Step } from '@prisma/client'
-import React, { useEffect, useState } from 'react'
-import { deleteStep, getStepsBySetId } from '../../../data/step'
-import { GuideStep } from './GuideStep'
-import { StepModal } from './StepModal'
+import { Button } from '@/components/ui/button';
+import { Step } from '@prisma/client';
+import { Reorder } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import {
+	deleteStep,
+	getStepsBySetId,
+	updateStepsOrder,
+} from '../../../data/step';
+import { GuideStep } from './GuideStep';
+import { StepModal } from './StepModal';
 
 export const GuideStepsList = ({ setId }: { setId: number }) => {
 	const [steps, setSteps] = useState<Step[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+	const [selectedStep, setSelectedStep] = useState<Step | null>(null);
 
 	useEffect(() => {
 		const fetchSteps = async () => {
@@ -28,17 +34,62 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 	// }
 
 	const handleStepCreated = (newStep: Step) => {
-		setSteps(prevSteps => [...prevSteps, newStep]); // Обновляем список шагов
+		const updatedSteps = steps.map(step => {
+			if (step.order >= newStep.order) {
+				return { ...step, order: step.order + 1 };
+			}
+			return step;
+		});
+		const finalSteps = [...updatedSteps, newStep].sort(
+			(a, b) => a.order - b.order
+		);
+
+		setSteps(finalSteps);
+
+		try {
+			updateStepsOrder(
+				finalSteps.map(step => ({ id: step.id, order: step.order }))
+			);
+		} catch (error) {
+			console.error('Ошибка при обновлении порядка шагов на сервере:', error);
+		}
+	};
+
+	const handleStepEdited = (step: Step) => {
+		setSelectedStep(step);
+		setIsModalOpen(true);
 	};
 
 	const handleStepDeleted = async (stepId: number) => {
 		try {
-			// Удаляем шаг из базы данных
 			await deleteStep(stepId);
-			// Обновляем состояние, удаляя шаг из UI
-			setSteps(prevSteps => prevSteps.filter(step => step.id !== stepId));
+
+			const updatedSteps = steps
+				.filter(step => step.id !== stepId)
+				.map((step, index) => ({ ...step, order: index + 1 }));
+			setSteps(updatedSteps);
+
+			await updateStepsOrder(
+				updatedSteps.map(step => ({ id: step.id, order: step.order }))
+			);
 		} catch (error) {
 			console.error('Ошибка при удалении шага:', error);
+		}
+	};
+
+	const handleReorder = async (newOrder: Step[]) => {
+		const updatedSteps = newOrder.map((step, index) => ({
+			...step,
+			order: index + 1,
+		}));
+		setSteps(updatedSteps);
+		try {
+			updatedSteps.map(step => ({ id: step.id, order: step.order }));
+			await updateStepsOrder(
+				updatedSteps.map(step => ({ id: step.id, order: step.order }))
+			);
+		} catch (error) {
+			console.error('Ошибка при обновлении порядка шагов на сервере:', error);
 		}
 	};
 
@@ -57,16 +108,30 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 			{steps.length === 0 ? (
 				<p>No steps available.</p>
 			) : (
-				<ul className='space-y-4'>
+				<Reorder.Group
+					axis='y'
+					values={steps}
+					onReorder={handleReorder}
+					as='ul'
+					className='space-y-4'
+				>
 					{steps.map(step => (
-						<li key={step.id} className='border p-4 rounded-lg shadow-sm'>
-							<GuideStep step={step} onStepDeleted={handleStepDeleted} />
-						</li>
+						<Reorder.Item
+							key={step.id}
+							value={step}
+							as='li'
+							className='border p-4 rounded-lg shadow-sm'
+						>
+							<GuideStep
+								step={step}
+								onStepDeleted={handleStepDeleted}
+								onStepEdited={handleStepEdited}
+							/>
+						</Reorder.Item>
 					))}
-				</ul>
+				</Reorder.Group>
 			)}
 
-			{/* Модалка для добавления нового шага */}
 			<StepModal
 				setId={setId}
 				isOpen={isModalOpen}
