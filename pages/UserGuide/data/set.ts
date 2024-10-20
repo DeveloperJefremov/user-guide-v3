@@ -1,12 +1,15 @@
 'use server';
 import { SetWithSteps } from '@/lib/types/types';
-import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
+import { createSetSchema } from '@/lib/zod/setSchema';
 import { prisma } from '@/prisma/prisma-client';
 
 export async function getGuideSets(): Promise<SetWithSteps[]> {
 	const sets = await prisma.set.findMany({
 		where: {
 			status: { in: ['EMPTY', 'DRAFT', 'UNDER_REVIEW', 'COMPLETED'] },
+		},
+		orderBy: {
+			order: 'asc', // Упорядочиваем сеты по полю `order`
 		},
 		include: {
 			steps: {
@@ -83,5 +86,23 @@ export async function updateSet(
 		return updatedSet;
 	} catch (error) {
 		throw new Error('Не удалось обновить сет');
+	}
+}
+
+export async function updateSetsOrder(
+	updatedSets: { id: number; order: number }[]
+) {
+	try {
+		const updatePromises = updatedSets.map(set =>
+			prisma.set.update({
+				where: { id: set.id },
+				data: { order: set.order },
+			})
+		);
+		await Promise.all(updatePromises);
+		return { success: true };
+	} catch (error) {
+		console.error('Ошибка при обновлении порядка сетов:', error);
+		throw new Error('Не удалось обновить порядок сетов');
 	}
 }

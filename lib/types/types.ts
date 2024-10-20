@@ -33,6 +33,7 @@ export interface Set {
 	id: number;
 	title: string;
 	status: Status;
+	order: number;
 	createdAt: Date;
 	updatedAt: Date;
 	userId: number;

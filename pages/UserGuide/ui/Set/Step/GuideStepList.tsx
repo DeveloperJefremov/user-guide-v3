@@ -22,19 +22,6 @@ export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [selectedStep, setSelectedStep] = useState<Step | null>(null);
 
-	// useEffect(() => {
-	// 	const fetchSteps = async () => {
-	// 		try {
-	// 			const stepsData = await getStepsBySetId(setId);
-	// 			setSteps(stepsData);
-	// 		} catch (error) {
-	// 			console.error('Ошибка при получении шагов:', error);
-	// 		}
-	// 	};
-
-	// 	fetchSteps();
-	// }, [setId]);
-
 	const handleStepCreated = (newStep: Step) => {
 		const updatedSteps = localSteps.map(step => {
 			if (step.order >= newStep.order) {
@@ -88,15 +75,10 @@ export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
 	};
 
 	const handleReorder = async (newOrder: Step[]) => {
-		const updatedSteps = newOrder.map((step, index) => ({
-			...step,
-			order: index + 1,
-		}));
-		setLocalSteps(updatedSteps);
+		setLocalSteps(newOrder);
 		try {
-			updatedSteps.map(step => ({ id: step.id, order: step.order }));
 			await updateStepsOrder(
-				updatedSteps.map(step => ({ id: step.id, order: step.order }))
+				newOrder.map((step, index) => ({ id: step.id, order: index + 1 }))
 			);
 		} catch (error) {
 			console.error('Ошибка при обновлении порядка шагов на сервере:', error);
@@ -120,12 +102,12 @@ export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
 			) : (
 				<Reorder.Group
 					axis='y'
-					values={steps}
+					values={localSteps}
 					onReorder={handleReorder}
 					as='ul'
 					className='space-y-4'
 				>
-					{steps.map(step => (
+					{localSteps.map(step => (
 						<Reorder.Item
 							key={step.id}
 							value={step}

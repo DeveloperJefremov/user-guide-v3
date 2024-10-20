@@ -2,10 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import { SetWithSteps } from '@/lib/types/types';
-import { Set } from '@prisma/client';
 import { Reorder } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { deleteSet, getGuideSets, updateSet } from './data/set';
+import {
+	deleteSet,
+	getGuideSets,
+	updateSet,
+	updateSetsOrder,
+} from './data/set';
 import { GuideSet } from './ui/Set/GuideSet';
 import { SetModal } from './ui/Set/SetModal';
 
@@ -62,6 +66,23 @@ export const GuideSetList = () => {
 		setSelectedSet(null);
 	};
 
+	const handleReorder = async (newOrder: SetWithSteps[]) => {
+		setSets(newOrder);
+
+		// Подготовка данных для обновления порядка в базе данных
+		const updatedSetsOrder = newOrder.map((set, index) => ({
+			id: set.id,
+			order: index,
+		}));
+
+		try {
+			// Вызываем серверный экшен для обновления порядка
+			await updateSetsOrder(updatedSetsOrder);
+		} catch (error) {
+			console.error('Ошибка при сохранении нового порядка сетов:', error);
+		}
+	};
+
 	return (
 		<div className='border p-5 m-8 overflow-auto'>
 			<div className='flex justify-between items-center'>
@@ -69,7 +90,7 @@ export const GuideSetList = () => {
 				<Button onClick={() => setIsModalOpen(true)}>Add Tutorial</Button>
 			</div>
 
-			<Reorder.Group axis='y' values={sets} onReorder={setSets}>
+			<Reorder.Group axis='y' values={sets} onReorder={handleReorder}>
 				{sets.map(set => (
 					<Reorder.Item key={set.id} value={set}>
 						<GuideSet

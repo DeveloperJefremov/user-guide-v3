@@ -20,6 +20,7 @@ model Set {
   status    Status   @default(EMPTY)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  order     Int      @default(0)
 
   userId Int
   user   User @relation(fields: [userId], references: [id])

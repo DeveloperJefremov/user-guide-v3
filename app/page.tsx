@@ -8,7 +8,7 @@ interface Props {
 }
 const Home = ({ className }: Props) => {
 	return (
-		<div className='grid grid-rows-[100vh_1fr] grid-cols-[100px_1fr] h-screen'>
+		<div className='grid grid-rows-[100vh_1fr] grid-cols-[150px_1fr] h-screen'>
 			<FirstSideBar />
 			<GuideSetList />
 		</div>
