@@ -1,13 +1,16 @@
 import { Step } from '@prisma/client';
-import { useEffect } from 'react';
+import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import tippy, { hideAll } from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 
 interface StepHighlighterProps {
 	steps: Step[];
-	currentStepIndex: number; // Текущий индекс шага приходит как проп
-	goToNextStep: () => void; // Функция для перехода к следующему шагу
-	goToPrevStep: () => void; // Функция для возврата к предыдущему шагу
+	currentStepIndex: number;
+	goToNextStep: () => void;
+	goToPrevStep: () => void;
+	setIsLaunching: (isLaunching: boolean) => void;
 }
 
 export const StepHighlighter = ({
@@ -15,7 +18,12 @@ export const StepHighlighter = ({
 	currentStepIndex,
 	goToNextStep,
 	goToPrevStep,
+	setIsLaunching,
 }: StepHighlighterProps) => {
+	const [tooltipElement, setTooltipElement] = useState<HTMLElement | null>(
+		null
+	);
+
 	useEffect(() => {
 		if (steps.length === 0) return;
 
@@ -23,41 +31,23 @@ export const StepHighlighter = ({
 		const element = document.getElementById(step.elementId);
 
 		if (element) {
-			tippy(element, {
-				content: `
-					<div>
-						<h3 class="text-lg font-bold">${step.title}</h3>
-						<p class="text-sm">${step.description || 'No description'}</p>
-						<p class="text-sm">Element ID: ${step.elementId}</p>
-						<p class="text-sm">Page URL: ${step.pageUrl}</p>
-						<div class="mt-4 flex justify-between">
-							<button id="back-btn" class="bg-blue-500 text-white px-2 py-1 rounded">Back</button>
-							<button id="next-btn" class="bg-blue-500 text-white px-2 py-1 rounded">Next</button>
-						</div>
-					</div>
-				`,
-				allowHTML: true,
+			const tooltipDiv = document.createElement('div'); // Создаем элемент для тултипа
+			setTooltipElement(tooltipDiv);
+
+			const instance = tippy(element, {
+				content: tooltipDiv, // Вместо строки используем элемент
 				trigger: 'manual',
 				placement: 'right',
 				interactive: true,
-				onShown(instance) {
-					const backBtn = document.getElementById('back-btn');
-					const nextBtn = document.getElementById('next-btn');
+			});
 
-					// Обработчики для кнопок
-					if (backBtn) {
-						backBtn.onclick = goToPrevStep; // Переход на предыдущий шаг
-					}
-					if (nextBtn) {
-						nextBtn.onclick = goToNextStep; // Переход на следующий шаг
-					}
-				},
-			}).show();
+			instance.show();
 
-			// Подсветка текущего элемента
+			// Добавляем классы для подсветки элемента
 			element.classList.add('ring-2', 'ring-red-500', 'bg-red-100');
 		}
 
+		// Очистка при смене шага или размонтировании компонента
 		return () => {
 			hideAll();
 			steps.forEach(step => {
@@ -69,5 +59,53 @@ export const StepHighlighter = ({
 		};
 	}, [currentStepIndex, steps]);
 
-	return null;
+	// Функция для закрытия тултипа и удаления подсветки
+	const closeTooltip = () => {
+		setIsLaunching(false);
+		hideAll(); // Закрываем тултип
+		const element = document.getElementById(steps[currentStepIndex].elementId);
+		if (element) {
+			element.classList.remove('ring-2', 'ring-red-500', 'bg-red-100'); // Убираем подсветку
+		}
+	};
+
+	return (
+		tooltipElement &&
+		ReactDOM.createPortal(
+			<div style={{ position: 'relative' }}>
+				<button
+					id='close-btn'
+					className='absolute top-2 right-2'
+					onClick={closeTooltip} // Закрываем тултип и убираем подсветку
+				>
+					<X className='w-5 h-5 text-gray-500 hover:text-gray-700' />
+				</button>
+				<h3 className='text-lg font-bold'>{steps[currentStepIndex].title}</h3>
+				<p className='text-sm'>
+					{steps[currentStepIndex].description || 'No description'}
+				</p>
+				<p className='text-sm'>
+					Element ID: {steps[currentStepIndex].elementId}
+				</p>
+				<p className='text-sm'>Page URL: {steps[currentStepIndex].pageUrl}</p>
+				<div className='mt-4 flex justify-between'>
+					<button
+						id='back-btn'
+						className='bg-blue-500 text-white px-2 py-1 rounded'
+						onClick={goToPrevStep}
+					>
+						Back
+					</button>
+					<button
+						id='next-btn'
+						className='bg-blue-500 text-white px-2 py-1 rounded'
+						onClick={goToNextStep}
+					>
+						Next
+					</button>
+				</div>
+			</div>,
+			tooltipElement
+		)
+	);
 };

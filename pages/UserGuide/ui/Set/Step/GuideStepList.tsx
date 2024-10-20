@@ -17,12 +17,14 @@ interface GuideStepsListProps {
 	steps: Step[];
 	setId: number;
 	isLaunching: boolean;
+	setIsLaunching: (isLaunching: boolean) => void;
 }
 
 export const GuideStepsList = ({
 	steps,
 	setId,
 	isLaunching,
+	setIsLaunching,
 }: GuideStepsListProps) => {
 	const [localSteps, setLocalSteps] = useState<Step[]>(steps);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -165,6 +167,7 @@ export const GuideStepsList = ({
 			{isLaunching && (
 				<StepHighlighter
 					steps={steps}
+					setIsLaunching={setIsLaunching}
 					currentStepIndex={currentStepIndex} // Передаем текущий шаг в StepHighlighter
 					goToNextStep={goToNextStep} // Передаем функцию переключения вперед
 					goToPrevStep={goToPrevStep} // Передаем функцию переключения назад

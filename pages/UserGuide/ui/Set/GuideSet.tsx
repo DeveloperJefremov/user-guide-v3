@@ -66,6 +66,7 @@ export const GuideSet = ({
 						steps={set.steps}
 						setId={set.id}
 						isLaunching={isLaunching}
+						setIsLaunching={setIsLaunching}
 					/>
 					<SetFooter onLaunch={handleLaunch} />
 				</div>
