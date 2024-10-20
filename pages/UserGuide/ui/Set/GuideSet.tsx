@@ -5,7 +5,6 @@ import { SetWithSteps } from '@/lib/types/types';
 import { SetFooter } from './SetFooter';
 import { SetHeader } from './SetHeader';
 import { GuideStepsList } from './Step/GuideStepList';
-import { StepHighlighter } from './Step/StepHighlighter';
 
 interface GuideSetProps {
 	set: SetWithSteps;
@@ -43,7 +42,6 @@ export const GuideSet = ({
 
 	const handleLaunch = () => {
 		setIsLaunching(true);
-		setTimeout(() => setIsLaunching(false), 5000); // Убираем подсветку через 5 секунд
 	};
 
 	return (
@@ -64,10 +62,13 @@ export const GuideSet = ({
 						isExpanded ? 'max-h-screen' : 'max-h-0 overflow-hidden'
 					}`}
 				>
-					<GuideStepsList steps={set.steps} setId={set.id} />
+					<GuideStepsList
+						steps={set.steps}
+						setId={set.id}
+						isLaunching={isLaunching}
+					/>
 					<SetFooter onLaunch={handleLaunch} />
 				</div>
-				{isLaunching && <StepHighlighter steps={set.steps} />}{' '}
 			</div>
 		</div>
 	);

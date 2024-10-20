@@ -9,18 +9,25 @@ import {
 	// getStepsBySetId,
 	updateStepsOrder,
 } from '../../../data/step';
+import { StepHighlighter } from '../StepHighlighter';
 import { GuideStep } from './GuideStep';
 import { StepModal } from './StepModal';
 
 interface GuideStepsListProps {
 	steps: Step[];
 	setId: number;
+	isLaunching: boolean;
 }
 
-export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
+export const GuideStepsList = ({
+	steps,
+	setId,
+	isLaunching,
+}: GuideStepsListProps) => {
 	const [localSteps, setLocalSteps] = useState<Step[]>(steps);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [selectedStep, setSelectedStep] = useState<Step | null>(null);
+	const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
 
 	const handleStepCreated = (newStep: Step) => {
 		const updatedSteps = localSteps.map(step => {
@@ -90,6 +97,18 @@ export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
 		}
 	};
 
+	const goToNextStep = () => {
+		if (currentStepIndex < steps.length - 1) {
+			setCurrentStepIndex(prev => prev + 1);
+		}
+	};
+
+	const goToPrevStep = () => {
+		if (currentStepIndex > 0) {
+			setCurrentStepIndex(prev => prev - 1);
+		}
+	};
+
 	return (
 		<div className='mt-4'>
 			<div className='flex justify-between items-center mb-2'>
@@ -140,6 +159,15 @@ export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
 					onStepUpdated={handleStepUpdated}
 					initialData={selectedStep}
 					stepId={selectedStep?.id}
+				/>
+			)}
+
+			{isLaunching && (
+				<StepHighlighter
+					steps={steps}
+					currentStepIndex={currentStepIndex} // Передаем текущий шаг в StepHighlighter
+					goToNextStep={goToNextStep} // Передаем функцию переключения вперед
+					goToPrevStep={goToPrevStep} // Передаем функцию переключения назад
 				/>
 			)}
 		</div>
