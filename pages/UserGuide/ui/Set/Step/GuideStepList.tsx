@@ -75,10 +75,15 @@ export const GuideStepsList = ({ steps, setId }: GuideStepsListProps) => {
 	};
 
 	const handleReorder = async (newOrder: Step[]) => {
-		setLocalSteps(newOrder);
+		const reorderedSteps = newOrder.map((step, index) => ({
+			...step,
+			order: index + 1,
+		}));
+		setLocalSteps(reorderedSteps);
+
 		try {
 			await updateStepsOrder(
-				newOrder.map((step, index) => ({ id: step.id, order: index + 1 }))
+				reorderedSteps.map(step => ({ id: step.id, order: step.order }))
 			);
 		} catch (error) {
 			console.error('Ошибка при обновлении порядка шагов на сервере:', error);
