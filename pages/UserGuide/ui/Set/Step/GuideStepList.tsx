@@ -3,42 +3,36 @@
 import { Button } from '@/components/ui/button';
 import { Step } from '@prisma/client';
 import { Reorder } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
 	deleteStep,
-	getStepsBySetId,
+	// getStepsBySetId,
 	updateStepsOrder,
 } from '../../../data/step';
+import { StepHighlighter } from '../StepHighlighter';
 import { GuideStep } from './GuideStep';
 import { StepModal } from './StepModal';
 
-export const GuideStepsList = ({ setId }: { setId: number }) => {
-	const [steps, setSteps] = useState<Step[]>([]);
+interface GuideStepsListProps {
+	steps: Step[];
+	setId: number;
+	isLaunching: boolean;
+	setIsLaunching: (isLaunching: boolean) => void;
+}
+
+export const GuideStepsList = ({
+	steps,
+	setId,
+	isLaunching,
+	setIsLaunching,
+}: GuideStepsListProps) => {
+	const [localSteps, setLocalSteps] = useState<Step[]>(steps);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 	const [selectedStep, setSelectedStep] = useState<Step | null>(null);
-
-	useEffect(() => {
-		const fetchSteps = async () => {
-			try {
-				const stepsData = await getStepsBySetId(setId);
-				setSteps(stepsData);
-			} catch (error) {
-				console.error('Ошибка при получении шагов:', error);
-			}
-		};
-
-		fetchSteps();
-	}, [setId]);
-	// if (steps.length === 0) {
-	// 	return <p className='text-gray-500'>No steps available.</p>;
-	// }
-	const closeModal = () => {
-		setSelectedStep(null); // Сбрасываем выбранный шаг
-		setIsModalOpen(false); // Закрываем модальное окно
-	};
+	const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
 
 	const handleStepCreated = (newStep: Step) => {
-		const updatedSteps = steps.map(step => {
+		const updatedSteps = localSteps.map(step => {
 			if (step.order >= newStep.order) {
 				return { ...step, order: step.order + 1 };
 			}
@@ -48,7 +42,7 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 			(a, b) => a.order - b.order
 		);
 
-		setSteps(finalSteps);
+		setLocalSteps(finalSteps);
 
 		try {
 			updateStepsOrder(
@@ -65,20 +59,21 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 	};
 
 	const handleStepUpdated = (updatedStep: Step) => {
-		const updatedSteps = steps.map(step =>
-			step.id === updatedStep.id ? updatedStep : step
+		setLocalSteps(prevSteps =>
+			prevSteps.map(step => (step.id === updatedStep.id ? updatedStep : step))
 		);
-		setSteps(updatedSteps);
+		setIsModalOpen(false);
+		setSelectedStep(null);
 	};
 
 	const handleStepDeleted = async (stepId: number) => {
 		try {
 			await deleteStep(stepId);
 
-			const updatedSteps = steps
+			const updatedSteps = localSteps
 				.filter(step => step.id !== stepId)
 				.map((step, index) => ({ ...step, order: index + 1 }));
-			setSteps(updatedSteps);
+			setLocalSteps(updatedSteps);
 
 			await updateStepsOrder(
 				updatedSteps.map(step => ({ id: step.id, order: step.order }))
@@ -89,18 +84,30 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 	};
 
 	const handleReorder = async (newOrder: Step[]) => {
-		const updatedSteps = newOrder.map((step, index) => ({
+		const reorderedSteps = newOrder.map((step, index) => ({
 			...step,
 			order: index + 1,
 		}));
-		setSteps(updatedSteps);
+		setLocalSteps(reorderedSteps);
+
 		try {
-			updatedSteps.map(step => ({ id: step.id, order: step.order }));
 			await updateStepsOrder(
-				updatedSteps.map(step => ({ id: step.id, order: step.order }))
+				reorderedSteps.map(step => ({ id: step.id, order: step.order }))
 			);
 		} catch (error) {
 			console.error('Ошибка при обновлении порядка шагов на сервере:', error);
+		}
+	};
+
+	const goToNextStep = () => {
+		if (currentStepIndex < steps.length - 1) {
+			setCurrentStepIndex(prev => prev + 1);
+		}
+	};
+
+	const goToPrevStep = () => {
+		if (currentStepIndex > 0) {
+			setCurrentStepIndex(prev => prev - 1);
 		}
 	};
 
@@ -119,17 +126,17 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 				</Button>
 			</div>
 
-			{steps.length === 0 ? (
+			{localSteps.length === 0 ? (
 				<p>No steps available.</p>
 			) : (
 				<Reorder.Group
 					axis='y'
-					values={steps}
+					values={localSteps}
 					onReorder={handleReorder}
 					as='ul'
 					className='space-y-4'
 				>
-					{steps.map(step => (
+					{localSteps.map(step => (
 						<Reorder.Item
 							key={step.id}
 							value={step}
@@ -145,15 +152,30 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 					))}
 				</Reorder.Group>
 			)}
+			{isModalOpen && (
+				<StepModal
+					setId={setId}
+					isOpen={isModalOpen}
+					onClose={() => {
+						setIsModalOpen(false);
+						setSelectedStep(null);
+					}}
+					onStepCreated={handleStepCreated}
+					onStepUpdated={handleStepUpdated}
+					initialData={selectedStep}
+					stepId={selectedStep?.id}
+				/>
+			)}
 
-			<StepModal
-				setId={setId}
-				step={selectedStep} // Передаем выбранный шаг или null для создания
-				isOpen={isModalOpen}
-				onClose={closeModal}
-				onStepCreated={handleStepCreated}
-				onStepEdited={handleStepUpdated}
-			/>
+			{isLaunching && (
+				<StepHighlighter
+					steps={steps}
+					setIsLaunching={setIsLaunching}
+					currentStepIndex={currentStepIndex} // Передаем текущий шаг в StepHighlighter
+					goToNextStep={goToNextStep} // Передаем функцию переключения вперед
+					goToPrevStep={goToPrevStep} // Передаем функцию переключения назад
+				/>
+			)}
 		</div>
 	);
 };

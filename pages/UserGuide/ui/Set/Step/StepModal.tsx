@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
 import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
-import { createStep } from '@/pages/UserGuide/data/step';
+import { createStep, updateStep } from '@/pages/UserGuide/data/step';
 import { Modal } from '@/pages/UserGuide/shared/Modal';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Step } from '@prisma/client';
@@ -22,54 +22,58 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 interface StepModalProps {
 	setId: number;
+	stepId?: number;
 	isOpen: boolean;
 	onClose: () => void;
 	onStepCreated: (newStep: Step) => void;
-	onStepEdited: (updatedStep: Step) => void;
-	step?: Step | null;
+	onStepUpdated: (updatedStep: Step) => void;
+	initialData?: Step | null;
 }
 
 export const StepModal = ({
 	setId,
+	stepId,
 	isOpen,
 	onClose,
 	onStepCreated,
-	onStepEdited,
-	step,
+	onStepUpdated,
+	initialData,
 }: StepModalProps) => {
-	const localStorageKey = step
-		? `editStep_${setId}_${step.id}` // Для редактирования шага
-		: `newStep_${setId}`; // Для создания нового шага
+	const isEditing = Boolean(initialData);
+	const localStorageKey = isEditing
+		? `editStep_${setId}_${stepId}`
+		: `newStep_${setId}`;
 
 	// Хук для работы с localStorage
 
 	const [stepData, setStepData, removeStepData] =
 		useLocalStorage<CreateStepInput>(
 			localStorageKey,
-			step
+			isEditing && initialData
 				? {
-						title: step.title || '',
-						description: step.description || '', // Преобразуем null в ''
-						order: step.order,
-						setId: step.setId,
-						elementId: step.elementId || '',
-						imageUrl: step.imageUrl || undefined, // Преобразуем null в undefined
-						imageChecked: step.imageChecked,
-						imageHeight: step.imageHeight || undefined, // Преобразуем null в undefined
-						imageWidth: step.imageWidth || undefined, // Преобразуем null в undefined
-						pageUrl: step.pageUrl || '',
+						title: initialData.title,
+						description: initialData.description ?? '', // Преобразуем null в пустую строку
+						order: initialData.order,
+						elementId: initialData.elementId,
+						imageUrl: initialData.imageUrl ?? undefined, // Преобразуем null в undefined для опционального поля
+						imageChecked: initialData.imageChecked,
+						imageHeight: initialData.imageHeight ?? 200, // Преобразуем null в дефолтное значение
+						imageWidth: initialData.imageWidth ?? 200, // Преобразуем null в дефолтное значение
+						pageUrl: initialData.pageUrl,
+						setId: initialData.setId,
 				  }
 				: {
+						// Для нового шага берем значения из localStorage или дефолтные значения
 						title: '',
 						description: '',
 						order: 1,
-						setId: setId,
 						elementId: '',
 						imageUrl: undefined,
 						imageChecked: false,
 						imageHeight: 200,
 						imageWidth: 200,
 						pageUrl: '',
+						setId: setId,
 				  }
 		);
 
@@ -96,34 +100,17 @@ export const StepModal = ({
 		defaultValue: stepData.imageChecked,
 	});
 
-	// Подгружаем данные из localStorage при открытии модального окна
-	useEffect(() => {
-		if (isOpen) {
-			reset(stepData); // Сбрасываем форму с данными из localStorage
-		}
-	}, [isOpen, stepData, reset]);
-
 	// Автофокус на первое поле при открытии модального окна
 	useEffect(() => {
-		if (isOpen) {
-			const subscription = methods.watch(data => {
-				const validatedData = {
-					...data,
-					setId: data.setId ?? setId,
-					title: data.title || '',
-					description: data.description || '',
-					order: data.order ?? 1,
-					elementId: data.elementId || '',
-					imageChecked: data.imageChecked ?? false,
-					pageUrl: data.pageUrl || '',
-					imageHeight: data.imageHeight ?? 200,
-					imageWidth: data.imageWidth ?? 200,
-				};
-				setStepData(validatedData); // Обновляем данные в localStorage
-			});
-			return () => subscription.unsubscribe();
+		if (isOpen && inputRef.current) {
+			inputRef.current.focus(); // Устанавливаем фокус на первое поле
 		}
-	}, [methods, setStepData, isOpen, setId]);
+	}, [isOpen]);
+
+	// Подгружаем данные из localStorage при открытии модального окна
+	useEffect(() => {
+		reset(stepData); // Сбрасываем форму с данными из localStorage
+	}, [stepData, reset]);
 
 	// Сохраняем данные формы в localStorage при каждом изменении
 	useEffect(() => {
@@ -150,14 +137,18 @@ export const StepModal = ({
 	const onSubmit = async (data: CreateStepInput) => {
 		setLoading(true);
 		try {
-			const newStep = await createStep({ ...data, setId });
-
-			onStepCreated(newStep);
+			if (isEditing && initialData) {
+				const updatedStep = await updateStep(initialData.id, data);
+				onStepUpdated(updatedStep);
+			} else {
+				const newStep = await createStep({ ...data, setId });
+				onStepCreated(newStep);
+			}
 			reset();
 			removeStepData();
 			onClose();
 		} catch (error) {
-			console.error('Error creating/updating step:', error);
+			console.error('Ошибка при создании/обновлении шага:', error);
 		} finally {
 			setLoading(false);
 		}
@@ -165,15 +156,15 @@ export const StepModal = ({
 
 	// Обработчик для кнопки Cancel — сброс данных
 	const handleCancel = () => {
-		reset(); // Сбрасываем данные формы
-		removeStepData(); // Очищаем localStorage
-		onClose(); // Закрываем модальное окно
+		reset();
+		removeStepData();
+		onClose();
 	};
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
 			<h2 className='text-2xl font-bold mb-6'>
-				{step ? 'Edit Step' : 'Add New Step'}
+				{isEditing ? 'Edit' : 'Create'} Step
 			</h2>
 			<FormProvider {...methods}>
 				<form onSubmit={handleSubmit(onSubmit)}>
@@ -382,10 +373,10 @@ export const StepModal = ({
 						</Button>
 						<Button type='submit' className='ml-4' disabled={loading}>
 							{loading
-								? step
+								? isEditing
 									? 'Updating...'
 									: 'Adding...'
-								: step
+								: isEditing
 								? 'Update Step'
 								: 'Add Step'}
 						</Button>

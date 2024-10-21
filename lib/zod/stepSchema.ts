@@ -10,7 +10,7 @@ export const createStepSchema = z.object({
 	),
 	setId: z.number(),
 	elementId: z.string().min(1, 'Element ID is required'),
-	imageUrl: z.string().url('Invalid URL format').optional(),
+	imageUrl: z.string().url('Invalid URL format').optional().or(z.literal('')),
 
 	imageChecked: z.boolean(),
 	imageHeight: z.number().min(1, 'Image height is required').optional(),

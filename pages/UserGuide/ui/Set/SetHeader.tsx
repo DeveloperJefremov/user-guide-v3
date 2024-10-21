@@ -30,6 +30,7 @@ export const SetHeader = ({
 			id: setId,
 			title: setTitle,
 			status: status,
+			order: 0,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 			userId: 1, // Замените на актуальный userId

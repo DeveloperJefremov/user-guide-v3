@@ -20,6 +20,7 @@ model Set {
   status    Status   @default(EMPTY)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  order     Int      @default(0)
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
@@ -39,7 +40,6 @@ enum Status {
 model Step {
   id           Int      @id @default(autoincrement())
   setId        Int // Внешний ключ на модель Set
-  set          Set      @relation(fields: [setId], references: [id], onDelete: Cascade)
   title        String
   description  String?  @db.Text
   order        Int
@@ -51,6 +51,8 @@ model Step {
   pageUrl      String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  set Set @relation(fields: [setId], references: [id], onDelete: Cascade)
 
   @@index([setId])
 }

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
+import { SetWithSteps } from '@/lib/types/types';
 import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Set } from '@prisma/client';
@@ -20,8 +21,8 @@ import { Modal } from '../../shared/Modal';
 interface SetModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSetCreated: (newSet: Set) => void;
-	onSetUpdated: (updatedSet: Set) => void;
+	onSetCreated: (newSet: SetWithSteps) => void;
+	onSetUpdated: (updatedSet: SetWithSteps) => void;
 	initialData?: Set | null;
 }
 
@@ -42,7 +43,7 @@ export function SetModal({
 		initialData?.title || ''
 	);
 
-	const methods = useForm<CreateSetInput>({
+	const methods = useForm<SetWithSteps>({
 		resolver: zodResolver(createSetSchema),
 		defaultValues: {
 			title: titleValue,
@@ -68,7 +69,7 @@ export function SetModal({
 		}
 	}, [isOpen]);
 
-	const onSubmit = async (data: CreateSetInput) => {
+	const onSubmit = async (data: SetWithSteps) => {
 		try {
 			if (isEditing && initialData) {
 				const updatedSet = await updateSet(initialData.id, data);

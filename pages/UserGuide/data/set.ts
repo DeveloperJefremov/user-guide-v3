@@ -1,12 +1,15 @@
 'use server';
-
-import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
+import { SetWithSteps } from '@/lib/types/types';
+import { createSetSchema } from '@/lib/zod/setSchema';
 import { prisma } from '@/prisma/prisma-client';
 
-export async function getGuideSets() {
+export async function getGuideSets(): Promise<SetWithSteps[]> {
 	const sets = await prisma.set.findMany({
 		where: {
 			status: { in: ['EMPTY', 'DRAFT', 'UNDER_REVIEW', 'COMPLETED'] },
+		},
+		orderBy: {
+			order: 'asc', // Упорядочиваем сеты по полю `order`
 		},
 		include: {
 			steps: {
@@ -19,7 +22,7 @@ export async function getGuideSets() {
 	return sets;
 }
 
-export async function createSet(data: CreateSetInput) {
+export async function createSet(data: SetWithSteps): Promise<SetWithSteps> {
 	const parsedData = createSetSchema.safeParse(data);
 
 	if (!parsedData.success) {
@@ -31,6 +34,13 @@ export async function createSet(data: CreateSetInput) {
 			title: parsedData.data.title,
 			userId: 1, // Замените на реальный userId после настройки аутентификации
 			status: 'EMPTY', // Или другой статус по умолчанию
+		},
+		include: {
+			steps: {
+				orderBy: {
+					order: 'asc',
+				},
+			},
 		},
 	});
 
@@ -48,7 +58,10 @@ export async function deleteSet(setId: number) {
 }
 
 // Обновление существующего сета
-export async function updateSet(setId: number, data: CreateSetInput) {
+export async function updateSet(
+	setId: number,
+	data: SetWithSteps
+): Promise<SetWithSteps> {
 	const parsedData = createSetSchema.safeParse(data);
 
 	if (!parsedData.success) {
@@ -62,9 +75,34 @@ export async function updateSet(setId: number, data: CreateSetInput) {
 				title: parsedData.data.title,
 				// Добавьте другие поля, если необходимо
 			},
+			include: {
+				steps: {
+					orderBy: {
+						order: 'asc',
+					},
+				},
+			},
 		});
 		return updatedSet;
 	} catch (error) {
 		throw new Error('Не удалось обновить сет');
+	}
+}
+
+export async function updateSetsOrder(
+	updatedSets: { id: number; order: number }[]
+) {
+	try {
+		const updatePromises = updatedSets.map(set =>
+			prisma.set.update({
+				where: { id: set.id },
+				data: { order: set.order },
+			})
+		);
+		await Promise.all(updatePromises);
+		return { success: true };
+	} catch (error) {
+		console.error('Ошибка при обновлении порядка сетов:', error);
+		throw new Error('Не удалось обновить порядок сетов');
 	}
 }

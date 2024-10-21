@@ -1,14 +1,15 @@
 import { Set, Status } from '@prisma/client';
 import { useState } from 'react';
 
+import { SetWithSteps } from '@/lib/types/types';
 import { SetFooter } from './SetFooter';
 import { SetHeader } from './SetHeader';
 import { GuideStepsList } from './Step/GuideStepList';
 
 interface GuideSetProps {
-	set: Set;
+	set: SetWithSteps;
 	onDelete: (setId: number) => void;
-	onEdit: (set: Set) => void;
+	onEdit: (set: SetWithSteps) => void;
 	onChangeStatus?: (setId: number, newStatus: Status) => void;
 }
 
@@ -19,6 +20,7 @@ export const GuideSet = ({
 	onChangeStatus,
 }: GuideSetProps) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
+	const [isLaunching, setIsLaunching] = useState<boolean>(false);
 
 	const handleDelete = () => {
 		onDelete(set.id);
@@ -36,6 +38,10 @@ export const GuideSet = ({
 	};
 	const toggleExpand = () => {
 		setIsExpanded(prev => !prev);
+	};
+
+	const handleLaunch = () => {
+		setIsLaunching(true);
 	};
 
 	return (
@@ -56,8 +62,13 @@ export const GuideSet = ({
 						isExpanded ? 'max-h-screen' : 'max-h-0 overflow-hidden'
 					}`}
 				>
-					<GuideStepsList setId={set.id} />
-					<SetFooter />
+					<GuideStepsList
+						steps={set.steps}
+						setId={set.id}
+						isLaunching={isLaunching}
+						setIsLaunching={setIsLaunching}
+					/>
+					<SetFooter onLaunch={handleLaunch} />
 				</div>
 			</div>
 		</div>

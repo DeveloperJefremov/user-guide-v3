@@ -2,18 +2,19 @@
 import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
 import { prisma } from '@/prisma/prisma-client';
 
-export async function getStepsBySetId(setId: number) {
-	const steps = await prisma.step.findMany({
-		where: {
-			setId: setId, // Получаем шаги для конкретного сета
-		},
-		orderBy: {
-			order: 'asc', // Упорядочиваем шаги по полю `order`
-		},
-	});
+// export async function getStepsBySetId(setId: number) {
+// 	const steps = await prisma.step.findMany({
+// 		where: {
+// 			setId: setId, // Получаем шаги для конкретного сета
+// 		},
+// 		orderBy: {
+// 			order: 'asc', // Упорядочиваем шаги по полю `order`
+// 		},
 
-	return steps;
-}
+// 	});
+
+// 	return steps;
+// }
 
 export async function createStep(data: CreateStepInput) {
 	const parsedData = createStepSchema.safeParse(data);
