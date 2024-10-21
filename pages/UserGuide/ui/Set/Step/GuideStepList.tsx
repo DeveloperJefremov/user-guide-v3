@@ -116,11 +116,8 @@ export const GuideStepsList = ({
 			<div className='flex justify-between items-center mb-2'>
 				<h3 className='text-lg font-semibold'>Guide Steps List:</h3>
 				<Button
-					className='text-white px-4 py-2 rounded-md'
-					onClick={() => {
-						setSelectedStep(null); // Очищаем выбранный шаг для создания нового
-						setIsModalOpen(true);
-					}}
+					className=' text-white px-4 py-2 rounded-md'
+					onClick={() => setIsModalOpen(true)}
 				>
 					Add Lesson
 				</Button>

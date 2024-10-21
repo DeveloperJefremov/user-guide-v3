@@ -45,7 +45,6 @@ export const StepModal = ({
 		: `newStep_${setId}`;
 
 	// Хук для работы с localStorage
-
 	const [stepData, setStepData, removeStepData] =
 		useLocalStorage<CreateStepInput>(
 			localStorageKey,
