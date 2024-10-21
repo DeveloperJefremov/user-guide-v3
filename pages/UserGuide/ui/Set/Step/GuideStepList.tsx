@@ -111,6 +111,9 @@ export const GuideStepsList = ({
 		}
 	};
 
+	const maxOrder =
+		localSteps.length > 0 ? Math.max(...localSteps.map(step => step.order)) : 0;
+
 	return (
 		<div className='mt-4'>
 			<div className='flex justify-between items-center mb-2'>
@@ -161,6 +164,7 @@ export const GuideStepsList = ({
 					onStepUpdated={handleStepUpdated}
 					initialData={selectedStep}
 					stepId={selectedStep?.id}
+					maxOrder={maxOrder}
 				/>
 			)}
 
@@ -168,9 +172,9 @@ export const GuideStepsList = ({
 				<StepHighlighter
 					steps={steps}
 					setIsLaunching={setIsLaunching}
-					currentStepIndex={currentStepIndex} // Передаем текущий шаг в StepHighlighter
-					goToNextStep={goToNextStep} // Передаем функцию переключения вперед
-					goToPrevStep={goToPrevStep} // Передаем функцию переключения назад
+					currentStepIndex={currentStepIndex}
+					goToNextStep={goToNextStep}
+					goToPrevStep={goToPrevStep}
 				/>
 			)}
 		</div>

@@ -28,6 +28,7 @@ interface StepModalProps {
 	onStepCreated: (newStep: Step) => void;
 	onStepUpdated: (updatedStep: Step) => void;
 	initialData?: Step | null;
+	maxOrder?: number;
 }
 
 export const StepModal = ({
@@ -38,6 +39,7 @@ export const StepModal = ({
 	onStepCreated,
 	onStepUpdated,
 	initialData,
+	maxOrder = 1,
 }: StepModalProps) => {
 	const isEditing = Boolean(initialData);
 	const localStorageKey = isEditing
@@ -65,7 +67,7 @@ export const StepModal = ({
 						// Для нового шага берем значения из localStorage или дефолтные значения
 						title: '',
 						description: '',
-						order: 1,
+						order: maxOrder + 1,
 						elementId: '',
 						imageUrl: undefined,
 						imageChecked: false,
