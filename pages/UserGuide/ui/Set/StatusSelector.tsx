@@ -8,7 +8,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils'; // Утилита для объединения классов, если используется
+import { cn } from '@/lib/utils';
 import { Status } from '@prisma/client';
 import React, { useState } from 'react';
 

@@ -2,26 +2,26 @@
 
 import { Button } from '@/components/ui/button';
 import { SetWithSteps } from '@/lib/types/types';
+import { Status } from '@prisma/client';
 import { Reorder } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import {
-	deleteSet,
-	getGuideSets,
-	updateSet,
-	updateSetsOrder,
-} from './data/set';
+import { deleteSet, getGuideSets, updateSetsOrder } from './data/set';
 import { GuideSet } from './ui/Set/GuideSet';
 import { SetModal } from './ui/Set/SetModal';
+import { StatusFilter } from './ui/Set/StatusFilter';
 
 export const GuideSetList = () => {
 	const [sets, setSets] = useState<SetWithSteps[]>([]);
+	const [filteredSets, setFilteredSets] = useState<SetWithSteps[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedSet, setSelectedSet] = useState<SetWithSteps | null>(null);
+	const [filterStatus, setFilterStatus] = useState<Status | 'ALL'>('ALL'); // Начальный статус - "ALL"
 
 	async function fetchSets() {
 		try {
 			const sets = await getGuideSets();
 			setSets(sets);
+			setFilteredSets(sets); // Изначально отображаем все сеты
 		} catch (error) {
 			console.error('Ошибка при получении сетов:', error);
 		}
@@ -30,6 +30,15 @@ export const GuideSetList = () => {
 	useEffect(() => {
 		fetchSets();
 	}, []);
+
+	// Функция для фильтрации сетов по статусу
+	useEffect(() => {
+		if (filterStatus === 'ALL') {
+			setFilteredSets(sets); // Если "ALL", отображаем все сеты
+		} else {
+			setFilteredSets(sets.filter(set => set.status === filterStatus));
+		}
+	}, [filterStatus, sets]);
 
 	const handleCreateSet = (newSet?: SetWithSteps) => {
 		if (newSet) {
@@ -44,7 +53,6 @@ export const GuideSetList = () => {
 		setSets(prevSets => prevSets.filter(set => set.id !== setId));
 		try {
 			await deleteSet(setId);
-			// Удаляем сохраненные данные для этого сета из localStorage
 			localStorage.removeItem(`editSetTitle_${setId}`);
 			localStorage.removeItem(`newStep_${setId}`);
 		} catch (error) {
@@ -69,14 +77,12 @@ export const GuideSetList = () => {
 	const handleReorder = async (newOrder: SetWithSteps[]) => {
 		setSets(newOrder);
 
-		// Подготовка данных для обновления порядка в базе данных
 		const updatedSetsOrder = newOrder.map((set, index) => ({
 			id: set.id,
 			order: index,
 		}));
 
 		try {
-			// Вызываем серверный экшен для обновления порядка
 			await updateSetsOrder(updatedSetsOrder);
 		} catch (error) {
 			console.error('Ошибка при сохранении нового порядка сетов:', error);
@@ -90,8 +96,14 @@ export const GuideSetList = () => {
 				<Button onClick={() => setIsModalOpen(true)}>Add Tutorial</Button>
 			</div>
 
-			<Reorder.Group axis='y' values={sets} onReorder={handleReorder}>
-				{sets.map(set => (
+			{/* Фильтр по статусам */}
+			<StatusFilter
+				currentStatus={filterStatus}
+				onStatusChange={setFilterStatus}
+			/>
+
+			<Reorder.Group axis='y' values={filteredSets} onReorder={handleReorder}>
+				{filteredSets.map(set => (
 					<Reorder.Item key={set.id} value={set}>
 						<GuideSet
 							key={set.id}

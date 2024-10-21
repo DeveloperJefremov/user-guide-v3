@@ -2,6 +2,7 @@
 import { SetWithSteps } from '@/lib/types/types';
 import { createSetSchema } from '@/lib/zod/setSchema';
 import { prisma } from '@/prisma/prisma-client';
+import { Status } from '@prisma/client';
 
 export async function getGuideSets(): Promise<SetWithSteps[]> {
 	const sets = await prisma.set.findMany({
@@ -73,7 +74,6 @@ export async function updateSet(
 			where: { id: setId },
 			data: {
 				title: parsedData.data.title,
-				// Добавьте другие поля, если необходимо
 			},
 			include: {
 				steps: {
@@ -86,6 +86,18 @@ export async function updateSet(
 		return updatedSet;
 	} catch (error) {
 		throw new Error('Не удалось обновить сет');
+	}
+}
+
+export async function updateSetStatus(setId: number, newStatus: Status) {
+	try {
+		const updatedSet = await prisma.set.update({
+			where: { id: setId },
+			data: { status: newStatus },
+		});
+		return updatedSet;
+	} catch (error) {
+		throw new Error('Не удалось обновить статус сета');
 	}
 }
 

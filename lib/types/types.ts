@@ -62,5 +62,3 @@ export interface Step {
 	updatedAt: Date;
 	// set?: Set;
 }
-
-export type ModeType = 'CREATE' | 'EDIT' | 'DISPLAY' | 'EXECUTE';

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Set, Status } from '@prisma/client';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 import React from 'react';
+import { updateSetStatus } from '../../data/set';
 import { StatusSelector } from './StatusSelector';
 
 interface SetHeaderProps {
@@ -38,12 +39,17 @@ export const SetHeader = ({
 		});
 	};
 
-	const handleStatusChange = (newStatus: Status) => {
-		if (onChangeStatus) {
-			onChangeStatus(setId, newStatus);
+	const handleStatusChange = async (newStatus: Status) => {
+		// показываем индикатор загрузки
+		try {
+			await updateSetStatus(setId, newStatus); // обновляем статус в базе данных
+			if (onChangeStatus) {
+				onChangeStatus(setId, newStatus); // обновляем статус в UI
+			}
+		} catch (error) {
+			console.error('Ошибка при изменении статуса:', error);
 		}
 	};
-
 	return (
 		<header className=' p-4 flex justify-between items-center'>
 			<div className='flex items-center'>
