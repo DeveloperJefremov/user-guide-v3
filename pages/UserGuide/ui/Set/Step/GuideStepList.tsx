@@ -32,6 +32,10 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 	// if (steps.length === 0) {
 	// 	return <p className='text-gray-500'>No steps available.</p>;
 	// }
+	const closeModal = () => {
+		setSelectedStep(null); // Сбрасываем выбранный шаг
+		setIsModalOpen(false); // Закрываем модальное окно
+	};
 
 	const handleStepCreated = (newStep: Step) => {
 		const updatedSteps = steps.map(step => {
@@ -58,6 +62,13 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 	const handleStepEdited = (step: Step) => {
 		setSelectedStep(step);
 		setIsModalOpen(true);
+	};
+
+	const handleStepUpdated = (updatedStep: Step) => {
+		const updatedSteps = steps.map(step =>
+			step.id === updatedStep.id ? updatedStep : step
+		);
+		setSteps(updatedSteps);
 	};
 
 	const handleStepDeleted = async (stepId: number) => {
@@ -98,8 +109,11 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 			<div className='flex justify-between items-center mb-2'>
 				<h3 className='text-lg font-semibold'>Guide Steps List:</h3>
 				<Button
-					className=' text-white px-4 py-2 rounded-md'
-					onClick={() => setIsModalOpen(true)}
+					className='text-white px-4 py-2 rounded-md'
+					onClick={() => {
+						setSelectedStep(null); // Очищаем выбранный шаг для создания нового
+						setIsModalOpen(true);
+					}}
 				>
 					Add Lesson
 				</Button>
@@ -134,9 +148,11 @@ export const GuideStepsList = ({ setId }: { setId: number }) => {
 
 			<StepModal
 				setId={setId}
+				step={selectedStep} // Передаем выбранный шаг или null для создания
 				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
+				onClose={closeModal}
 				onStepCreated={handleStepCreated}
+				onStepEdited={handleStepUpdated}
 			/>
 		</div>
 	);

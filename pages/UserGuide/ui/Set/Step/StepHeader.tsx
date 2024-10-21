@@ -6,7 +6,6 @@ interface StepHeaderProps {
 	title: string;
 	order: number;
 	isExpanded: boolean;
-
 	onToggleExpand: () => void;
 	onStepDeleted: () => void;
 	onStepEdited: () => void;
@@ -16,15 +15,10 @@ const StepHeader = ({
 	title,
 	order,
 	isExpanded,
-
 	onToggleExpand,
 	onStepDeleted,
 	onStepEdited,
 }: StepHeaderProps) => {
-	// const handleDelete = () => {
-	// 	onStepDeleted(stepId);
-	// };
-
 	return (
 		<div className='mb-4 flex justify-between items-center'>
 			<div>

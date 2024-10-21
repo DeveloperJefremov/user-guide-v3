@@ -25,6 +25,8 @@ interface StepModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onStepCreated: (newStep: Step) => void;
+	onStepEdited: (updatedStep: Step) => void;
+	step?: Step | null;
 }
 
 export const StepModal = ({
@@ -32,23 +34,44 @@ export const StepModal = ({
 	isOpen,
 	onClose,
 	onStepCreated,
+	onStepEdited,
+	step,
 }: StepModalProps) => {
-	const localStorageKey = `newStep_${setId}`;
+	const localStorageKey = step
+		? `editStep_${setId}_${step.id}` // Для редактирования шага
+		: `newStep_${setId}`; // Для создания нового шага
 
 	// Хук для работы с localStorage
+
 	const [stepData, setStepData, removeStepData] =
-		useLocalStorage<CreateStepInput>(localStorageKey, {
-			title: '',
-			description: '',
-			order: 1,
-			elementId: '',
-			imageUrl: undefined,
-			imageChecked: false,
-			imageHeight: 200,
-			imageWidth: 200,
-			pageUrl: '',
-			setId: setId,
-		});
+		useLocalStorage<CreateStepInput>(
+			localStorageKey,
+			step
+				? {
+						title: step.title || '',
+						description: step.description || '', // Преобразуем null в ''
+						order: step.order,
+						setId: step.setId,
+						elementId: step.elementId || '',
+						imageUrl: step.imageUrl || undefined, // Преобразуем null в undefined
+						imageChecked: step.imageChecked,
+						imageHeight: step.imageHeight || undefined, // Преобразуем null в undefined
+						imageWidth: step.imageWidth || undefined, // Преобразуем null в undefined
+						pageUrl: step.pageUrl || '',
+				  }
+				: {
+						title: '',
+						description: '',
+						order: 1,
+						setId: setId,
+						elementId: '',
+						imageUrl: undefined,
+						imageChecked: false,
+						imageHeight: 200,
+						imageWidth: 200,
+						pageUrl: '',
+				  }
+		);
 
 	const methods = useForm<CreateStepInput>({
 		resolver: zodResolver(createStepSchema),
@@ -82,10 +105,25 @@ export const StepModal = ({
 
 	// Автофокус на первое поле при открытии модального окна
 	useEffect(() => {
-		if (isOpen && inputRef.current) {
-			inputRef.current.focus(); // Устанавливаем фокус на первое поле
+		if (isOpen) {
+			const subscription = methods.watch(data => {
+				const validatedData = {
+					...data,
+					setId: data.setId ?? setId,
+					title: data.title || '',
+					description: data.description || '',
+					order: data.order ?? 1,
+					elementId: data.elementId || '',
+					imageChecked: data.imageChecked ?? false,
+					pageUrl: data.pageUrl || '',
+					imageHeight: data.imageHeight ?? 200,
+					imageWidth: data.imageWidth ?? 200,
+				};
+				setStepData(validatedData); // Обновляем данные в localStorage
+			});
+			return () => subscription.unsubscribe();
 		}
-	}, [isOpen]);
+	}, [methods, setStepData, isOpen, setId]);
 
 	// Сохраняем данные формы в localStorage при каждом изменении
 	useEffect(() => {
@@ -134,7 +172,9 @@ export const StepModal = ({
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
-			<h2 className='text-2xl font-bold mb-6'>Add New Step</h2>
+			<h2 className='text-2xl font-bold mb-6'>
+				{step ? 'Edit Step' : 'Add New Step'}
+			</h2>
 			<FormProvider {...methods}>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<div className='mb-4'>
@@ -341,7 +381,13 @@ export const StepModal = ({
 							Cancel
 						</Button>
 						<Button type='submit' className='ml-4' disabled={loading}>
-							{loading ? 'Adding...' : 'Add Step'}
+							{loading
+								? step
+									? 'Updating...'
+									: 'Adding...'
+								: step
+								? 'Update Step'
+								: 'Add Step'}
 						</Button>
 					</div>
 				</form>

@@ -1,8 +1,8 @@
 'use client';
 
-import { Step } from '@prisma/client';
-import React, { useState } from 'react';
-import StepHeader from './StepHeader';
+import { Step } from '@prisma/client'
+import React, { useState } from 'react'
+import StepHeader from './StepHeader'
 
 interface GuideStepProps {
 	step: Step;
