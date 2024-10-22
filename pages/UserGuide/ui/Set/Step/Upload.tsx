@@ -5,9 +5,16 @@ import React, { useEffect, useState } from 'react';
 interface UploadProps {
 	onFileSelect: (file: File | null) => void; // Передача выбранного файла
 	initialPreview?: string | null; // Превью изображения, если уже выбрано
+	imageHeight: number; // Высота изображения, переданная из StepModal
+	imageWidth: number; // Ширина изображения, переданная из StepModal
 }
 
-export const Upload = ({ onFileSelect, initialPreview }: UploadProps) => {
+export const Upload = ({
+	onFileSelect,
+	initialPreview,
+	imageHeight,
+	imageWidth,
+}: UploadProps) => {
 	const [previewUrl, setPreviewUrl] = useState<string | null>(
 		initialPreview || null
 	); // Используем переданное превью
@@ -49,11 +56,30 @@ export const Upload = ({ onFileSelect, initialPreview }: UploadProps) => {
 			/>
 			{previewUrl && (
 				<div className='mt-4 flex items-center justify-between'>
-					<img
-						src={previewUrl}
-						alt='Preview'
-						className='w-32 h-32 object-cover border border-gray-200 rounded'
-					/>
+					{/* Статичная рамка для отображения максимальных размеров */}
+					<div
+						style={{
+							width: '200px', // Максимальная ширина рамки
+							height: '200px', // Максимальная высота рамки
+							border: '2px dashed gray', // Статичная рамка
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							overflow: 'hidden', // Обрезка изображения, если оно превышает рамку
+						}}
+					>
+						<img
+							src={previewUrl}
+							alt='Preview'
+							style={{
+								width: `${imageWidth / 2}px`, // Отображаем в половину размера
+								height: `${imageHeight / 2}px`, // Отображаем в половину размера
+								maxWidth: '100%', // Убедимся, что изображение не выходит за рамки
+								maxHeight: '100%', // Убедимся, что изображение не выходит за рамки
+							}}
+							className='object-contain' // Подгонка изображения в пределах рамки
+						/>
+					</div>
 					<Button
 						variant='destructive'
 						onClick={handleRemoveImage}

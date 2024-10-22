@@ -16,6 +16,7 @@ import { storage } from '@/lib/store/firebase';
 import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
 import { createStep, updateStep } from '@/pages/UserGuide/data/step';
 import { Modal } from '@/pages/UserGuide/shared/Modal';
+import { DevTool } from '@hookform/devtools';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Step } from '@prisma/client';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
@@ -44,7 +45,14 @@ export const StepModal = ({
 	initialData,
 	maxOrder = 1,
 }: StepModalProps) => {
+	const inputRef = useRef<HTMLInputElement | null>(null);
+
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [loading, setLoading] = useState<boolean>(false);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
 	const isEditing = Boolean(initialData);
+
 	const localStorageKey = isEditing
 		? `editStep_${setId}_${stepId}`
 		: `newStep_${setId}`;
@@ -88,14 +96,9 @@ export const StepModal = ({
 		handleSubmit,
 		reset,
 		control,
+
 		formState: { errors },
 	} = methods;
-
-	const inputRef = useRef<HTMLInputElement | null>(null);
-
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
-	const [loading, setLoading] = useState<boolean>(false);
-	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
 	// Следим за состоянием чекбокса imageChecked
 	const isImageChecked = useWatch({
@@ -377,6 +380,8 @@ export const StepModal = ({
 							<Upload
 								onFileSelect={handleFileSelect}
 								initialPreview={previewUrl}
+								imageHeight={stepData.imageHeight || 200}
+								imageWidth={stepData.imageWidth || 200}
 							/>
 
 							<div className='mb-4'>
@@ -446,6 +451,7 @@ export const StepModal = ({
 						</Button>
 					</div>
 				</form>
+				<DevTool control={control} />
 			</FormProvider>
 		</Modal>
 	);

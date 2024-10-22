@@ -106,7 +106,13 @@ export const StepHighlighter = ({
 						<img
 							src={steps[currentStepIndex].imageUrl}
 							alt='Step Image'
-							className='mt-4 max-w-full h-auto rounded-lg'
+							className='mt-4 rounded-lg'
+							style={{
+								width: `${steps[currentStepIndex].imageWidth || 'auto'}px`, // Устанавливаем ширину
+								height: `${steps[currentStepIndex].imageHeight || 'auto'}px`, // Устанавливаем высоту
+								maxWidth: '100%', // Гарантируем, что изображение не выйдет за пределы контейнера
+								maxHeight: '100%', // Ограничиваем высоту для мобильных устройств
+							}}
 						/>
 					)}
 
