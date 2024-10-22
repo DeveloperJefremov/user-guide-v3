@@ -7,10 +7,7 @@ interface UploadProps {
 	initialPreview?: string | null; // Превью изображения, если уже выбрано
 }
 
-export const Upload: React.FC<UploadProps> = ({
-	onFileSelect,
-	initialPreview,
-}) => {
+export const Upload = ({ onFileSelect, initialPreview }: UploadProps) => {
 	const [previewUrl, setPreviewUrl] = useState<string | null>(
 		initialPreview || null
 	); // Используем переданное превью
