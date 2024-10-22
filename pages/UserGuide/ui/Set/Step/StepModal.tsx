@@ -12,13 +12,21 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
+import { storage } from '@/lib/store/firebase';
 import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
 import { createStep, updateStep } from '@/pages/UserGuide/data/step';
 import { Modal } from '@/pages/UserGuide/shared/Modal';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Step } from '@prisma/client';
+import {
+	getDownloadURL,
+	getStorage,
+	ref,
+	uploadBytesResumable,
+} from 'firebase/storage';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { Upload } from './Upload';
 
 interface StepModalProps {
 	setId: number;
@@ -92,6 +100,7 @@ export const StepModal = ({
 
 	const inputRef = useRef<HTMLInputElement | null>(null); // Добавляем useRef для первого поля
 
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
 
 	// Следим за состоянием чекбокса imageChecked
@@ -135,16 +144,54 @@ export const StepModal = ({
 		}
 	}, [methods, setStepData, isOpen, setId]);
 
+	const handleImageUpload = async (): Promise<string | null> => {
+		if (!selectedFile) return null;
+
+		return new Promise((resolve, reject) => {
+			const storageRef = ref(storage, `images/${selectedFile.name}`);
+			const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+			uploadTask.on(
+				'state_changed',
+				snapshot => {
+					// Здесь можно добавить прогресс загрузки
+				},
+				error => {
+					console.error('Ошибка при загрузке:', error);
+					reject(null);
+				},
+				() => {
+					getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
+						resolve(downloadURL); // Возвращаем URL загруженного изображения
+					});
+				}
+			);
+		});
+	};
+
 	const onSubmit = async (data: CreateStepInput) => {
 		setLoading(true);
+
 		try {
+			let imageUrl = null;
+
+			if (selectedFile) {
+				imageUrl = await handleImageUpload(); // Загружаем изображение, если оно выбрано
+			}
+
+			const stepData = {
+				...data,
+				imageUrl: imageUrl || data.imageUrl, // Добавляем URL изображения, если оно загружено
+			};
+
 			if (isEditing && initialData) {
-				const updatedStep = await updateStep(initialData.id, data);
+				const updatedStep = await updateStep(initialData.id, stepData);
 				onStepUpdated(updatedStep);
 			} else {
-				const newStep = await createStep({ ...data, setId });
+				const newStep = await createStep({ ...stepData, setId });
 				onStepCreated(newStep);
 			}
+
 			reset();
 			removeStepData();
 			onClose();
@@ -316,6 +363,10 @@ export const StepModal = ({
 
 					{isImageChecked && (
 						<>
+							<>
+								{/* Компонент загрузки изображения */}
+								<Upload onFileSelect={setSelectedFile} />
+							</>
 							<div className='mb-4'>
 								<FormField
 									name='imageHeight'
