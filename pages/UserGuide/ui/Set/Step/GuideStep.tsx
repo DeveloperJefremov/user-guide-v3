@@ -60,8 +60,12 @@ export const GuideStep = ({
 									<img
 										src={step.imageUrl}
 										alt='Step image'
-										width={step.imageWidth || 200}
-										height={step.imageHeight || 200}
+										width={step.imageWidth || 200} // Используем ширину, заданную при создании/редактировании
+										height={step.imageHeight || 200} // Используем высоту, заданную при создании/редактировании
+										style={{
+											width: `${step.imageWidth || 200}px`, // Применяем ширину
+											height: `${step.imageHeight || 200}px`, // Применяем высоту
+										}}
 										className='mt-2'
 									/>
 								)}

@@ -16,12 +16,13 @@ export const Upload = ({
 	imageWidth,
 }: UploadProps) => {
 	const [previewUrl, setPreviewUrl] = useState<string | null>(
-		initialPreview || null
-	); // Используем переданное превью
+		initialPreview || localStorage.getItem('previewUrl') || null
+	); // Используем переданное превью или загружаем из локального хранилища
 
 	useEffect(() => {
 		if (initialPreview) {
 			setPreviewUrl(initialPreview); // Если передано превью, показываем его
+			localStorage.setItem('previewUrl', initialPreview); // Сохраняем в локальное хранилище
 		}
 	}, [initialPreview]);
 
@@ -33,6 +34,7 @@ export const Upload = ({
 			reader.onloadend = () => {
 				setPreviewUrl(reader.result as string); // Показываем превью изображения
 				onFileSelect(file); // Передаём выбранный файл в родительский компонент
+				localStorage.setItem('previewUrl', reader.result as string); // Сохраняем превью в локальное хранилище
 			};
 
 			reader.readAsDataURL(file);
@@ -44,6 +46,7 @@ export const Upload = ({
 	const handleRemoveImage = () => {
 		setPreviewUrl(null);
 		onFileSelect(null); // Убираем файл из состояния родительского компонента
+		localStorage.removeItem('previewUrl'); // Убираем изображение из локального хранилища
 	};
 
 	return (
