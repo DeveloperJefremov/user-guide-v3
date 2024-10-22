@@ -1,3 +1,5 @@
+'use client';
+
 import { Step } from '@prisma/client';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -98,6 +100,15 @@ export const StepHighlighter = ({
 						Element ID: {steps[currentStepIndex].elementId}
 					</p>
 					<p className='text-sm'>Page URL: {steps[currentStepIndex].pageUrl}</p>
+
+					{/* Отображение изображения, если оно есть */}
+					{steps[currentStepIndex].imageUrl && (
+						<img
+							src={steps[currentStepIndex].imageUrl}
+							alt='Step Image'
+							className='mt-4 max-w-full h-auto rounded-lg'
+						/>
+					)}
 
 					{/* Динамический счётчик шагов */}
 					<p className='text-sm font-medium mt-4'>
