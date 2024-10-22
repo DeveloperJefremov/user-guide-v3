@@ -377,55 +377,58 @@ export const StepModal = ({
 
 					{isImageChecked && (
 						<>
-							<Upload
-								onFileSelect={handleFileSelect}
-								initialPreview={previewUrl}
-								imageHeight={stepData.imageHeight || 200}
-								imageWidth={stepData.imageWidth || 200}
-							/>
-
 							<div className='mb-4'>
-								<FormField
-									name='imageHeight'
-									control={control}
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className='text-base font-medium text-gray-700'>
-												Image Height
-											</FormLabel>
-											<FormControl>
-												<Input
-													type='number'
-													{...field}
-													placeholder='Enter image height'
-													className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-												/>
-											</FormControl>
-										</FormItem>
-									)}
+								<Upload
+									onFileSelect={handleFileSelect}
+									initialPreview={previewUrl}
+									imageHeight={stepData.imageHeight || 200}
+									imageWidth={stepData.imageWidth || 200}
 								/>
 							</div>
+							<div className='mb-4 flex space-x-4'>
+								<div className='w-1/2'>
+									<FormField
+										name='imageHeight'
+										control={control}
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className='text-base font-medium text-gray-700'>
+													Image Height
+												</FormLabel>
+												<FormControl>
+													<Input
+														type='number'
+														{...field}
+														placeholder='Enter image height'
+														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
+													/>
+												</FormControl>
+											</FormItem>
+										)}
+									/>
+								</div>
 
-							<div className='mb-4'>
-								<FormField
-									name='imageWidth'
-									control={control}
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className='text-base font-medium text-gray-700'>
-												Image Width
-											</FormLabel>
-											<FormControl>
-												<Input
-													type='number'
-													{...field}
-													placeholder='Enter image width'
-													className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-												/>
-											</FormControl>
-										</FormItem>
-									)}
-								/>
+								<div className='w-1/2'>
+									<FormField
+										name='imageWidth'
+										control={control}
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className='text-base font-medium text-gray-700'>
+													Image Width
+												</FormLabel>
+												<FormControl>
+													<Input
+														type='number'
+														{...field}
+														placeholder='Enter image width'
+														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
+													/>
+												</FormControl>
+											</FormItem>
+										)}
+									/>
+								</div>
 							</div>
 						</>
 					)}
