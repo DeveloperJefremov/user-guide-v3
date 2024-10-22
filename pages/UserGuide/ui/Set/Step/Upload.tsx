@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import React, { useEffect, useState } from 'react';
 
 interface UploadProps {
 	onFileSelect: (file: File | null) => void; // Передача выбранного файла
+	initialPreview?: string | null; // Превью изображения, если уже выбрано
 }
 
-export const Upload: React.FC<UploadProps> = ({ onFileSelect }) => {
-	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+export const Upload: React.FC<UploadProps> = ({
+	onFileSelect,
+	initialPreview,
+}) => {
+	const [previewUrl, setPreviewUrl] = useState<string | null>(
+		initialPreview || null
+	); // Используем переданное превью
+
+	useEffect(() => {
+		if (initialPreview) {
+			setPreviewUrl(initialPreview); // Если передано превью, показываем его
+		}
+	}, [initialPreview]);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]; // Получаем выбранный файл
@@ -19,20 +33,38 @@ export const Upload: React.FC<UploadProps> = ({ onFileSelect }) => {
 
 			reader.readAsDataURL(file);
 		} else {
-			setPreviewUrl(null);
-			onFileSelect(null); // Если файл не выбран, сбрасываем
+			handleRemoveImage(); // Если файл не выбран, сбрасываем
 		}
+	};
+
+	const handleRemoveImage = () => {
+		setPreviewUrl(null);
+		onFileSelect(null); // Убираем файл из состояния родительского компонента
 	};
 
 	return (
 		<div className='upload-container'>
-			<input type='file' accept='image/*' onChange={handleFileChange} />
+			<Input
+				type='file'
+				accept='image/*'
+				onChange={handleFileChange}
+				className='mt-2 cursor-pointer'
+			/>
 			{previewUrl && (
-				<img
-					src={previewUrl}
-					alt='Preview'
-					className='mt-4 w-32 h-32 object-cover'
-				/>
+				<div className='mt-4 flex items-center justify-between'>
+					<img
+						src={previewUrl}
+						alt='Preview'
+						className='w-32 h-32 object-cover border border-gray-200 rounded'
+					/>
+					<Button
+						variant='destructive'
+						onClick={handleRemoveImage}
+						className='mt-2'
+					>
+						Remove Image
+					</Button>
+				</div>
 			)}
 		</div>
 	);

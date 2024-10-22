@@ -18,12 +18,7 @@ import { createStep, updateStep } from '@/pages/UserGuide/data/step';
 import { Modal } from '@/pages/UserGuide/shared/Modal';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Step } from '@prisma/client';
-import {
-	getDownloadURL,
-	getStorage,
-	ref,
-	uploadBytesResumable,
-} from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { Upload } from './Upload';
@@ -54,25 +49,23 @@ export const StepModal = ({
 		? `editStep_${setId}_${stepId}`
 		: `newStep_${setId}`;
 
-	// Хук для работы с localStorage
 	const [stepData, setStepData, removeStepData] =
 		useLocalStorage<CreateStepInput>(
 			localStorageKey,
 			isEditing && initialData
 				? {
 						title: initialData.title,
-						description: initialData.description ?? '', // Преобразуем null в пустую строку
+						description: initialData.description ?? '',
 						order: initialData.order,
 						elementId: initialData.elementId,
-						imageUrl: initialData.imageUrl ?? undefined, // Преобразуем null в undefined для опционального поля
+						imageUrl: initialData.imageUrl ?? undefined,
 						imageChecked: initialData.imageChecked,
-						imageHeight: initialData.imageHeight ?? 200, // Преобразуем null в дефолтное значение
-						imageWidth: initialData.imageWidth ?? 200, // Преобразуем null в дефолтное значение
+						imageHeight: initialData.imageHeight ?? 200,
+						imageWidth: initialData.imageWidth ?? 200,
 						pageUrl: initialData.pageUrl,
 						setId: initialData.setId,
 				  }
 				: {
-						// Для нового шага берем значения из localStorage или дефолтные значения
 						title: '',
 						description: '',
 						order: maxOrder + 1,
@@ -98,10 +91,11 @@ export const StepModal = ({
 		formState: { errors },
 	} = methods;
 
-	const inputRef = useRef<HTMLInputElement | null>(null); // Добавляем useRef для первого поля
+	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
 	// Следим за состоянием чекбокса imageChecked
 	const isImageChecked = useWatch({
@@ -113,16 +107,14 @@ export const StepModal = ({
 	// Автофокус на первое поле при открытии модального окна
 	useEffect(() => {
 		if (isOpen && inputRef.current) {
-			inputRef.current.focus(); // Устанавливаем фокус на первое поле
+			inputRef.current.focus();
 		}
 	}, [isOpen]);
 
-	// Подгружаем данные из localStorage при открытии модального окна
 	useEffect(() => {
-		reset(stepData); // Сбрасываем форму с данными из localStorage
+		reset(stepData);
 	}, [stepData, reset]);
 
-	// Сохраняем данные формы в localStorage при каждом изменении
 	useEffect(() => {
 		if (isOpen) {
 			const subscription = methods.watch(data => {
@@ -138,7 +130,7 @@ export const StepModal = ({
 					imageHeight: data.imageHeight ?? 200,
 					imageWidth: data.imageWidth ?? 200,
 				};
-				setStepData(validatedData); // Обновляем данные в localStorage
+				setStepData(validatedData);
 			});
 			return () => subscription.unsubscribe();
 		}
@@ -148,25 +140,45 @@ export const StepModal = ({
 		if (!selectedFile) return null;
 
 		return new Promise((resolve, reject) => {
+			console.log('Начинается загрузка файла:', selectedFile.name);
+
 			const storageRef = ref(storage, `images/${selectedFile.name}`);
 			const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
 			uploadTask.on(
 				'state_changed',
 				snapshot => {
-					// Здесь можно добавить прогресс загрузки
+					// Отображаем прогресс загрузки
+					const progress =
+						(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+					console.log(`Загрузка: ${progress}%`);
 				},
 				error => {
 					console.error('Ошибка при загрузке:', error);
 					reject(null);
 				},
 				() => {
+					// Получаем ссылку на загруженный файл
 					getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
-						resolve(downloadURL); // Возвращаем URL загруженного изображения
+						console.log('Файл успешно загружен. URL:', downloadURL);
+						resolve(downloadURL);
 					});
 				}
 			);
 		});
+	};
+
+	const handleFileSelect = (file: File | null) => {
+		setSelectedFile(file);
+		if (file) {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setPreviewUrl(reader.result as string); // Обновляем превью при выборе файла
+			};
+			reader.readAsDataURL(file);
+		} else {
+			setPreviewUrl(null); // Сбрасываем превью, если файл удалён
+		}
 	};
 
 	const onSubmit = async (data: CreateStepInput) => {
@@ -181,7 +193,7 @@ export const StepModal = ({
 
 			const stepData = {
 				...data,
-				imageUrl: imageUrl || data.imageUrl, // Добавляем URL изображения, если оно загружено
+				imageUrl: imageUrl || data.imageUrl,
 			};
 
 			if (isEditing && initialData) {
@@ -202,7 +214,6 @@ export const StepModal = ({
 		}
 	};
 
-	// Обработчик для кнопки Cancel — сброс данных
 	const handleCancel = () => {
 		reset();
 		removeStepData();
@@ -363,10 +374,11 @@ export const StepModal = ({
 
 					{isImageChecked && (
 						<>
-							<>
-								{/* Компонент загрузки изображения */}
-								<Upload onFileSelect={setSelectedFile} />
-							</>
+							<Upload
+								onFileSelect={handleFileSelect}
+								initialPreview={previewUrl}
+							/>
+
 							<div className='mb-4'>
 								<FormField
 									name='imageHeight'
