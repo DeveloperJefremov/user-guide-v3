@@ -6,8 +6,8 @@ import { useDropzone } from 'react-dropzone';
 interface UploadProps {
 	onFileSelect: (file: File | null) => void;
 	initialPreview?: string | null;
-	imageHeight: number;
-	imageWidth: number;
+	imageHeight: number; // В пикселях
+	imageWidth: number; // В пикселях
 }
 
 export const Upload = ({
@@ -21,12 +21,14 @@ export const Upload = ({
 	);
 	const inputRef = useRef<HTMLInputElement | null>(null); // Реф для сброса и программного обновления поля
 
+	// Сохраняем первоначальное превью
 	useEffect(() => {
 		if (initialPreview) {
 			setPreviewUrl(initialPreview); // Если передано начальное превью, устанавливаем его
 		}
 	}, [initialPreview]);
 
+	// Обработчик перетаскивания файла
 	const onDrop = (acceptedFiles: File[]) => {
 		const file = acceptedFiles[0];
 		if (file) {
@@ -50,6 +52,7 @@ export const Upload = ({
 		noClick: true, // Отключаем возможность клика
 	});
 
+	// Обработчик выбора файла
 	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
@@ -58,6 +61,7 @@ export const Upload = ({
 		}
 	};
 
+	// Обработчик удаления изображения
 	const handleRemoveImage = () => {
 		setPreviewUrl(null);
 		onFileSelect(null); // Убираем файл из состояния родительского компонента
@@ -85,7 +89,7 @@ export const Upload = ({
 					<Button
 						variant='destructive'
 						onClick={handleRemoveImage}
-						className='absolute top-2 right-2 '
+						className='absolute top-2 right-2'
 					>
 						<TrashIcon className='w-5 h-5' /> {/* Иконка корзины */}
 					</Button>
@@ -101,7 +105,9 @@ export const Upload = ({
 					padding: '20px',
 					width: '100%',
 					textAlign: 'center',
-					height: `${imageHeight}px`,
+					position: 'relative',
+					// Фиксируем размеры области превью с соотношением 16:9
+					aspectRatio: '16 / 9',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
@@ -123,8 +129,9 @@ export const Upload = ({
 							src={previewUrl}
 							alt='Preview'
 							style={{
-								width: '100%',
-								height: '100%',
+								// Изменяем размеры изображения в зависимости от полей
+								width: `${imageWidth}px`,
+								height: `${imageHeight}px`,
 								objectFit: 'contain',
 							}}
 						/>
