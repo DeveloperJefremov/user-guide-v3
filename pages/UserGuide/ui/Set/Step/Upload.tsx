@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import React, { useEffect, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 
 interface UploadProps {
-	onFileSelect: (file: File | null) => void; // Передача выбранного файла
-	initialPreview?: string | null; // Превью изображения, если уже выбрано
-	imageHeight: number; // Высота изображения, переданная из StepModal
-	imageWidth: number; // Ширина изображения, переданная из StepModal
+	onFileSelect: (file: File | null) => void;
+	initialPreview?: string | null;
+	imageHeight: number;
+	imageWidth: number;
 }
 
 export const Upload = ({
@@ -17,29 +17,35 @@ export const Upload = ({
 }: UploadProps) => {
 	const [previewUrl, setPreviewUrl] = useState<string | null>(
 		initialPreview || localStorage.getItem('previewUrl') || null
-	); // Используем переданное превью или загружаем из локального хранилища
+	);
 
 	useEffect(() => {
 		if (initialPreview) {
-			setPreviewUrl(initialPreview); // Если передано превью, показываем его
-			localStorage.setItem('previewUrl', initialPreview); // Сохраняем в локальное хранилище
+			setPreviewUrl(initialPreview); // Если передано начальное превью, устанавливаем его
 		}
 	}, [initialPreview]);
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0]; // Получаем выбранный файл
+	const onDrop = (acceptedFiles: File[]) => {
+		const file = acceptedFiles[0];
 		if (file) {
-			const reader = new FileReader();
+			setPreviewUrl(URL.createObjectURL(file));
+			onFileSelect(file); // Передаем выбранный файл в родительский компонент
+		}
+	};
 
-			reader.onloadend = () => {
-				setPreviewUrl(reader.result as string); // Показываем превью изображения
-				onFileSelect(file); // Передаём выбранный файл в родительский компонент
-				localStorage.setItem('previewUrl', reader.result as string); // Сохраняем превью в локальное хранилище
-			};
+	const { getRootProps, getInputProps } = useDropzone({
+		accept: {
+			'image/*': [], // Разрешаем все типы изображений
+		},
+		onDrop,
+		noClick: true, // Отключаем возможность клика
+	});
 
-			reader.readAsDataURL(file);
-		} else {
-			handleRemoveImage(); // Если файл не выбран, сбрасываем
+	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			setPreviewUrl(URL.createObjectURL(file));
+			onFileSelect(file); // Передаем выбранный файл в родительский компонент
 		}
 	};
 
@@ -51,45 +57,71 @@ export const Upload = ({
 
 	return (
 		<div className='upload-container'>
-			<Input
-				type='file'
-				accept='image/*'
-				onChange={handleFileChange}
-				className='mt-2 cursor-pointer'
-			/>
-			{previewUrl && (
-				<div className='mt-4 flex items-center justify-between'>
-					{/* Статичная рамка для отображения максимальных размеров */}
-					<div
-						style={{
-							width: '200px', // Максимальная ширина рамки
-							height: '200px', // Максимальная высота рамки
-							border: '2px dashed gray', // Статичная рамка
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							overflow: 'hidden', // Обрезка изображения, если оно превышает рамку
-						}}
-					>
-						<img
-							src={previewUrl}
-							alt='Preview'
-							style={{
-								width: `${imageWidth / 2}px`, // Отображаем в половину размера
-								height: `${imageHeight / 2}px`, // Отображаем в половину размера
-								maxWidth: '100%', // Убедимся, что изображение не выходит за рамки
-								maxHeight: '100%', // Убедимся, что изображение не выходит за рамки
-							}}
-							className='object-contain' // Подгонка изображения в пределах рамки
-						/>
-					</div>
+			{/* Кнопка для выбора файла */}
+			<div className='mb-4'>
+				<label className='block text-sm font-medium text-gray-700'>
+					Choose an image
+				</label>
+				<input
+					type='file'
+					accept='image/*'
+					onChange={handleFileSelect}
+					className='mt-2 p-2 border border-gray-300 rounded-md'
+				/>
+			</div>
+
+			{/* Зона для перетаскивания файлов (только через drag and drop) */}
+			<div className='flex items-center justify-between'>
+				<div
+					{...getRootProps()}
+					className='dropzone'
+					style={{
+						border: '2px dashed gray',
+						padding: '20px',
+						width: '48%',
+						textAlign: 'center',
+					}}
+				>
+					<input {...getInputProps()} />
+					<p>Drag 'n' drop an image here</p>
+				</div>
+
+				{previewUrl && (
 					<Button
 						variant='destructive'
 						onClick={handleRemoveImage}
-						className='mt-2'
+						className='ml-4 w-48' // Ширина кнопки удаления
 					>
 						Remove Image
 					</Button>
+				)}
+			</div>
+
+			{/* Если изображение загружено, показываем превью ниже */}
+			{previewUrl && (
+				<div
+					style={{
+						width: '100%', // Изображение на всю ширину формы
+						height: `${imageHeight}px`,
+						border: '2px dashed gray',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						overflow: 'hidden',
+						marginTop: '16px', // Отступ сверху для отделения от полей
+					}}
+				>
+					<img
+						src={previewUrl}
+						alt='Preview'
+						width={imageWidth} // Указываем ширину
+						height={imageHeight} // Указываем высоту
+						style={{
+							width: '100%', // Ширина изображения на 100% от контейнера
+							height: '100%', // Высота изображения
+							objectFit: 'contain',
+						}}
+					/>
 				</div>
 			)}
 		</div>

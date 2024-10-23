@@ -1,28 +1,28 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
 	FormControl,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
-import { storage } from '@/lib/store/firebase';
-import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
-import { createStep, updateStep } from '@/pages/UserGuide/data/step';
-import { Modal } from '@/pages/UserGuide/shared/Modal';
-import { DevTool } from '@hookform/devtools';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Step } from '@prisma/client';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import { useEffect, useRef, useState } from 'react';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
-import { Upload } from './Upload';
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { useLocalStorage } from '@/lib/hooks/useLocaleStorage'
+import { storage } from '@/lib/store/firebase'
+import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema'
+import { createStep, updateStep } from '@/pages/UserGuide/data/step'
+import { Modal } from '@/pages/UserGuide/shared/Modal'
+import { DevTool } from '@hookform/devtools'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Step } from '@prisma/client'
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
+import { useEffect, useRef, useState } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
+import { Upload } from './Upload'
 
 interface StepModalProps {
 	setId: number;
@@ -96,6 +96,7 @@ export const StepModal = ({
 		handleSubmit,
 		reset,
 		control,
+		setValue,
 
 		formState: { errors },
 	} = methods;
@@ -174,13 +175,12 @@ export const StepModal = ({
 	const handleFileSelect = (file: File | null) => {
 		setSelectedFile(file);
 		if (file) {
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setPreviewUrl(reader.result as string); // Обновляем превью при выборе файла
-			};
-			reader.readAsDataURL(file);
+			const fileUrl = URL.createObjectURL(file);
+			setValue('imageUrl', fileUrl); // Сохраняем изображение в форму
+			setPreviewUrl(fileUrl); // Устанавливаем превью изображения
 		} else {
-			setPreviewUrl(null); // Сбрасываем превью, если файл удалён
+			setValue('imageUrl', ''); // Очищаем поле imageUrl в форме
+			setPreviewUrl(null); // Очищаем превью
 		}
 	};
 
@@ -401,6 +401,7 @@ export const StepModal = ({
 														{...field}
 														placeholder='Enter image height'
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
+														value={field.value || 200}
 													/>
 												</FormControl>
 											</FormItem>
@@ -423,6 +424,7 @@ export const StepModal = ({
 														{...field}
 														placeholder='Enter image width'
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
+														value={field.value || 200}
 													/>
 												</FormControl>
 											</FormItem>

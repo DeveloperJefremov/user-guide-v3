@@ -1,6 +1,7 @@
 'use client';
 
 import { Step } from '@prisma/client';
+import Image from 'next/image';
 import React, { useState } from 'react';
 import StepHeader from './StepHeader';
 
@@ -57,7 +58,7 @@ export const GuideStep = ({
 							<div className='mt-2'>
 								<p className='text-gray-500'>Image URL: {step.imageUrl}</p>
 								{step.imageChecked && (
-									<img
+									<Image
 										src={step.imageUrl}
 										alt='Step image'
 										width={step.imageWidth || 200} // Используем ширину, заданную при создании/редактировании
