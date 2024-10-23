@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import React, { useEffect, useState } from 'react';
+import { TrashIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 interface UploadProps {
@@ -18,6 +19,7 @@ export const Upload = ({
 	const [previewUrl, setPreviewUrl] = useState<string | null>(
 		initialPreview || localStorage.getItem('previewUrl') || null
 	);
+	const inputRef = useRef<HTMLInputElement | null>(null); // Реф для сброса и программного обновления поля
 
 	useEffect(() => {
 		if (initialPreview) {
@@ -30,6 +32,13 @@ export const Upload = ({
 		if (file) {
 			setPreviewUrl(URL.createObjectURL(file));
 			onFileSelect(file); // Передаем выбранный файл в родительский компонент
+
+			// Программно обновляем поле выбора файла
+			if (inputRef.current) {
+				const dataTransfer = new DataTransfer();
+				dataTransfer.items.add(file);
+				inputRef.current.files = dataTransfer.files;
+			}
 		}
 	};
 
@@ -53,77 +62,75 @@ export const Upload = ({
 		setPreviewUrl(null);
 		onFileSelect(null); // Убираем файл из состояния родительского компонента
 		localStorage.removeItem('previewUrl'); // Убираем изображение из локального хранилища
+
+		// Сбрасываем значение поля выбора файла
+		if (inputRef.current) {
+			inputRef.current.value = ''; // Сбрасываем значение
+		}
 	};
 
 	return (
 		<div className='upload-container'>
-			{/* Кнопка для выбора файла */}
-			<div className='mb-4'>
-				<label className='block text-sm font-medium text-gray-700'>
-					Choose an image
-				</label>
+			{/* Поле для выбора файла через кнопку */}
+			<div className='relative mb-4 w-full'>
 				<input
 					type='file'
 					accept='image/*'
 					onChange={handleFileSelect}
-					className='mt-2 p-2 border border-gray-300 rounded-md'
+					className='mt-2 p-2 border border-gray-300 rounded-md w-full'
+					ref={inputRef} // Добавляем реф для управления полем
+					style={{ paddingRight: '3rem' }} // Добавляем отступ для кнопки
 				/>
-			</div>
-
-			{/* Зона для перетаскивания файлов (только через drag and drop) */}
-			<div className='flex items-center justify-between'>
-				<div
-					{...getRootProps()}
-					className='dropzone'
-					style={{
-						border: '2px dashed gray',
-						padding: '20px',
-						width: '48%',
-						textAlign: 'center',
-					}}
-				>
-					<input {...getInputProps()} />
-					<p>Drag 'n' drop an image here</p>
-				</div>
-
 				{previewUrl && (
 					<Button
 						variant='destructive'
 						onClick={handleRemoveImage}
-						className='ml-4 w-48' // Ширина кнопки удаления
+						className='absolute top-2 right-2 '
 					>
-						Remove Image
+						<TrashIcon className='w-5 h-5' /> {/* Иконка корзины */}
 					</Button>
 				)}
 			</div>
 
-			{/* Если изображение загружено, показываем превью ниже */}
-			{previewUrl && (
-				<div
-					style={{
-						width: '100%', // Изображение на всю ширину формы
-						height: `${imageHeight}px`,
-						border: '2px dashed gray',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						overflow: 'hidden',
-						marginTop: '16px', // Отступ сверху для отделения от полей
-					}}
-				>
-					<img
-						src={previewUrl}
-						alt='Preview'
-						width={imageWidth} // Указываем ширину
-						height={imageHeight} // Указываем высоту
-						style={{
-							width: '100%', // Ширина изображения на 100% от контейнера
-							height: '100%', // Высота изображения
-							objectFit: 'contain',
-						}}
-					/>
-				</div>
-			)}
+			{/* Область Drag 'n' Drop или превью изображения */}
+			<div
+				{...getRootProps()}
+				className='relative dropzone'
+				style={{
+					border: '2px dashed gray',
+					padding: '20px',
+					width: '100%',
+					textAlign: 'center',
+					height: `${imageHeight}px`,
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					overflow: 'hidden',
+				}}
+			>
+				{/* Если изображение не загружено, отображаем Drag 'n' Drop */}
+				{!previewUrl && (
+					<>
+						<input {...getInputProps()} />
+						<p>Drag 'n' drop an image here</p>
+					</>
+				)}
+
+				{/* Если изображение загружено, показываем превью */}
+				{previewUrl && (
+					<>
+						<img
+							src={previewUrl}
+							alt='Preview'
+							style={{
+								width: '100%',
+								height: '100%',
+								objectFit: 'contain',
+							}}
+						/>
+					</>
+				)}
+			</div>
 		</div>
 	);
 };
