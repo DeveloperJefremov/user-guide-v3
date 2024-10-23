@@ -1,28 +1,28 @@
 'use client';
 
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
 	FormControl,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { useLocalStorage } from '@/lib/hooks/useLocaleStorage'
-import { storage } from '@/lib/store/firebase'
-import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema'
-import { createStep, updateStep } from '@/pages/UserGuide/data/step'
-import { Modal } from '@/pages/UserGuide/shared/Modal'
-import { DevTool } from '@hookform/devtools'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Step } from '@prisma/client'
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
-import { useEffect, useRef, useState } from 'react'
-import { FormProvider, useForm, useWatch } from 'react-hook-form'
-import { Upload } from './Upload'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
+import { storage } from '@/lib/store/firebase';
+import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
+import { createStep, updateStep } from '@/pages/UserGuide/data/step';
+import { Modal } from '@/pages/UserGuide/shared/Modal';
+import { DevTool } from '@hookform/devtools';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Step } from '@prisma/client';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { useEffect, useRef, useState } from 'react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { Upload } from './Upload';
 
 interface StepModalProps {
 	setId: number;
@@ -52,6 +52,11 @@ export const StepModal = ({
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
 	const isEditing = Boolean(initialData);
+
+	const getPreviewUrlKey = (setId: number, stepId?: number) =>
+		isEditing && stepId
+			? `previewUrl_${setId}_${stepId}`
+			: `previewUrl_${setId}_new`;
 
 	const localStorageKey = isEditing
 		? `editStep_${setId}_${stepId}`
@@ -108,6 +113,10 @@ export const StepModal = ({
 		defaultValue: stepData.imageChecked,
 	});
 
+	useEffect(() => {
+		console.log(stepData);
+	}, [stepData]);
+
 	// Автофокус на первое поле при открытии модального окна
 	useEffect(() => {
 		if (isOpen && inputRef.current) {
@@ -118,6 +127,18 @@ export const StepModal = ({
 	useEffect(() => {
 		reset(stepData);
 	}, [stepData, reset]);
+
+	useEffect(() => {
+		//TODO:
+		if (isOpen) {
+			const previewKey = getPreviewUrlKey(setId, stepId);
+			const savedPreview = localStorage.getItem(previewKey);
+			if (savedPreview) {
+				setPreviewUrl(savedPreview); // Подгружаем сохранённое изображение
+				setValue('imageUrl', savedPreview);
+			}
+		}
+	}, [isOpen, setId, stepId, isEditing, setValue]);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -172,15 +193,28 @@ export const StepModal = ({
 		});
 	};
 
-	const handleFileSelect = (file: File | null) => {
+	const convertFileToBase64 = (file: File): Promise<string> => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = () => resolve(reader.result as string);
+			reader.onerror = error => reject(error);
+		});
+	};
+
+	const handleFileSelect = async (file: File | null) => {
+		// debugger;
+		const previewKey = getPreviewUrlKey(setId, stepId);
 		setSelectedFile(file);
 		if (file) {
-			const fileUrl = URL.createObjectURL(file);
-			setValue('imageUrl', fileUrl); // Сохраняем изображение в форму
-			setPreviewUrl(fileUrl); // Устанавливаем превью изображения
+			const fileBase64 = await convertFileToBase64(file);
+			setValue('imageUrl', fileBase64);
+			setPreviewUrl(fileBase64);
+			localStorage.setItem(previewKey, fileBase64); // Сохраняем для уникального шага
 		} else {
-			setValue('imageUrl', ''); // Очищаем поле imageUrl в форме
-			setPreviewUrl(null); // Очищаем превью
+			setValue('imageUrl', '');
+			setPreviewUrl(null);
+			localStorage.removeItem(previewKey); // Удаляем изображение из localStorage для уникального шага
 		}
 	};
 
@@ -380,9 +414,11 @@ export const StepModal = ({
 							<div className='mb-4'>
 								<Upload
 									onFileSelect={handleFileSelect}
-									initialPreview={previewUrl}
+									// setSelectedFile={setSelectedFile}
+									initialPreview={previewUrl || stepData.imageUrl}
 									imageHeight={stepData.imageHeight || 200}
 									imageWidth={stepData.imageWidth || 200}
+									// stepId={stepId ? Number(stepId) : 0}
 								/>
 							</div>
 							<div className='mb-4 flex space-x-4'>
