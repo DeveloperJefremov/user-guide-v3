@@ -129,7 +129,6 @@ export const StepModal = ({
 	}, [stepData, reset]);
 
 	useEffect(() => {
-		//TODO:
 		if (isOpen) {
 			const previewKey = getPreviewUrlKey(setId, stepId);
 			const savedPreview = localStorage.getItem(previewKey);
@@ -413,11 +412,12 @@ export const StepModal = ({
 						<>
 							<div className='mb-4'>
 								<Upload
+									setValue={setValue}
 									onFileSelect={handleFileSelect}
 									// setSelectedFile={setSelectedFile}
 									initialPreview={previewUrl || stepData.imageUrl}
-									imageHeight={stepData.imageHeight || 200}
-									imageWidth={stepData.imageWidth || 200}
+									// imageHeight={stepData.imageHeight || 200}
+									// imageWidth={stepData.imageWidth || 200}
 									// stepId={stepId ? Number(stepId) : 0}
 								/>
 							</div>

@@ -1,39 +1,40 @@
 import { Button } from '@/components/ui/button';
+import { CreateStepInput } from '@/lib/zod/stepSchema';
 import { TrashIcon } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { UseFormSetValue } from 'react-hook-form';
 
 interface UploadProps {
-	// setSelectedFile: (file: File | null) => void;
 	onFileSelect: (file: File | null) => void;
 	initialPreview?: string | null;
-	imageHeight: number; // В пикселях
-	imageWidth: number; // В пикселях
+	setValue: UseFormSetValue<CreateStepInput>; // Обновляем тип setValue
+	// imageHeight: number;
+	// imageWidth: number;
 }
 
 export const Upload = ({
-	// setSelectedFile,
+	setValue,
 	onFileSelect,
 	initialPreview,
-	imageHeight,
-	imageWidth,
-}: UploadProps) => {
+}: // imageHeight,
+// imageWidth,
+UploadProps) => {
 	const [previewUrl, setPreviewUrl] = useState<string | null>(
 		initialPreview || null
 	);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
-	const onDrop = (acceptedFiles: File[]) => {
+	const onDrop = async (acceptedFiles: File[]) => {
 		const file = acceptedFiles[0];
 		if (file) {
 			const fileUrl = URL.createObjectURL(file);
 			setPreviewUrl(fileUrl);
 			onFileSelect(file);
-			if (inputRef.current) {
-				const dataTransfer = new DataTransfer();
-				dataTransfer.items.add(file);
-				inputRef.current.files = dataTransfer.files;
-			}
+
+			const { width, height } = await getImageDimensions(file);
+			setValue('imageWidth', width);
+			setValue('imageHeight', height);
 		}
 	};
 
@@ -45,18 +46,38 @@ export const Upload = ({
 		noClick: true, // Отключаем возможность клика
 	});
 
-	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const getImageDimensions = (
+		file: File
+	): Promise<{ width: number; height: number }> => {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.src = URL.createObjectURL(file);
+			img.onload = () => {
+				resolve({ width: img.width, height: img.height });
+			};
+			img.onerror = () => {
+				reject(new Error('Failed to load image'));
+			};
+		});
+	};
+
+	const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
 			const fileUrl = URL.createObjectURL(file);
 			setPreviewUrl(fileUrl);
 			onFileSelect(file);
+
+			// Получаем реальные размеры изображения и обновляем поля формы
+			const { width, height } = await getImageDimensions(file);
+			setValue('imageWidth', width);
+			setValue('imageHeight', height);
 		}
 	};
 
 	const handleRemoveImage = () => {
 		setPreviewUrl(null);
-		// setSelectedFile(null);
+
 		onFileSelect(null);
 		if (inputRef.current) {
 			inputRef.current.value = '';
@@ -114,8 +135,8 @@ export const Upload = ({
 						src={previewUrl}
 						alt='Preview'
 						style={{
-							width: `${imageWidth}px`,
-							height: `${imageHeight}px`,
+							// width: `${imageWidth}px`,
+							// height: `${imageHeight}px`,
 							objectFit: 'contain',
 						}}
 					/>
