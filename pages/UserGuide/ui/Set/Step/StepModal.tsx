@@ -133,7 +133,7 @@ export const StepModal = ({
 			const previewKey = getPreviewUrlKey(setId, stepId);
 			const savedPreview = localStorage.getItem(previewKey);
 			if (savedPreview) {
-				setPreviewUrl(savedPreview); // Подгружаем сохранённое изображение
+				setPreviewUrl(savedPreview);
 				setValue('imageUrl', savedPreview);
 			}
 		}
@@ -254,6 +254,20 @@ export const StepModal = ({
 		reset();
 		removeStepData();
 		onClose();
+	};
+
+	const handleWidthChange = (value: number) => {
+		// Обновляем ширину и автоматически пересчитываем высоту
+		const newHeight = Math.round((value * 9) / 16);
+		setValue('imageWidth', value);
+		setValue('imageHeight', newHeight);
+	};
+
+	const handleHeightChange = (value: number) => {
+		// Обновляем высоту и автоматически пересчитываем ширину
+		const newWidth = Math.round((value * 16) / 9);
+		setValue('imageHeight', value);
+		setValue('imageWidth', newWidth);
 	};
 
 	return (
@@ -438,6 +452,9 @@ export const StepModal = ({
 														placeholder='Enter image height'
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
 														value={field.value || 200}
+														onChange={e =>
+															handleWidthChange(Number(e.target.value))
+														}
 													/>
 												</FormControl>
 											</FormItem>
@@ -461,6 +478,9 @@ export const StepModal = ({
 														placeholder='Enter image width'
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
 														value={field.value || 200}
+														onChange={e =>
+															handleHeightChange(Number(e.target.value))
+														}
 													/>
 												</FormControl>
 											</FormItem>

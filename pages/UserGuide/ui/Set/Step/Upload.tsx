@@ -113,7 +113,7 @@ UploadProps) => {
 				className='relative dropzone'
 				style={{
 					border: '2px dashed gray',
-					padding: '20px',
+					padding: '10px',
 					width: '100%',
 					textAlign: 'center',
 					position: 'relative',
