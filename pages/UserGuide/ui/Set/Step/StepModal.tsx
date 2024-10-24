@@ -73,8 +73,8 @@ export const StepModal = ({
 						elementId: initialData.elementId,
 						imageUrl: initialData.imageUrl ?? undefined,
 						imageChecked: initialData.imageChecked,
-						imageHeight: initialData.imageHeight ?? 200,
-						imageWidth: initialData.imageWidth ?? 200,
+						imageHeight: initialData.imageHeight ?? 0,
+						imageWidth: initialData.imageWidth ?? 0,
 						pageUrl: initialData.pageUrl,
 						setId: initialData.setId,
 				  }
@@ -85,8 +85,8 @@ export const StepModal = ({
 						elementId: '',
 						imageUrl: undefined,
 						imageChecked: false,
-						imageHeight: 200,
-						imageWidth: 200,
+						imageHeight: 0,
+						imageWidth: 0,
 						pageUrl: '',
 						setId: setId,
 				  }
@@ -256,19 +256,38 @@ export const StepModal = ({
 		onClose();
 	};
 
+	// Универсальная функция для дебаунса
+	const debounce = (fn: (value: number) => void, delay: number) => {
+		return (value: number) => {
+			if (debounceRef.current) {
+				clearTimeout(debounceRef.current);
+			}
+
+			debounceRef.current = setTimeout(() => {
+				fn(value);
+			}, delay);
+		};
+	};
+
+	// Функции для изменения ширины и высоты
 	const handleWidthChange = (value: number) => {
-		// Обновляем ширину и автоматически пересчитываем высоту
 		const newHeight = Math.round((value * 9) / 16);
 		setValue('imageWidth', value);
 		setValue('imageHeight', newHeight);
 	};
 
 	const handleHeightChange = (value: number) => {
-		// Обновляем высоту и автоматически пересчитываем ширину
 		const newWidth = Math.round((value * 16) / 9);
 		setValue('imageHeight', value);
 		setValue('imageWidth', newWidth);
 	};
+
+	// Использование универсальной функции debounce
+	const handleWidthChangeDebounced = debounce(handleWidthChange, 300);
+	const handleHeightChangeDebounced = debounce(handleHeightChange, 300);
+
+	// Дебаунс с использованием useRef и setTimeout
+	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
@@ -451,9 +470,11 @@ export const StepModal = ({
 														{...field}
 														placeholder='Enter image height'
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-														value={field.value || 200}
+														value={field.value || 0}
 														onChange={e =>
-															handleWidthChange(Number(e.target.value))
+															handleHeightChangeDebounced(
+																Number(e.target.value)
+															)
 														}
 													/>
 												</FormControl>
@@ -477,9 +498,9 @@ export const StepModal = ({
 														{...field}
 														placeholder='Enter image width'
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-														value={field.value || 200}
+														value={field.value || 0}
 														onChange={e =>
-															handleHeightChange(Number(e.target.value))
+															handleWidthChangeDebounced(Number(e.target.value))
 														}
 													/>
 												</FormControl>
