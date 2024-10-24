@@ -11,6 +11,9 @@ interface UploadProps {
 	// imageHeight: number;
 	// imageWidth: number;
 	// selectedFile?: File | null;
+	getImageDimensions: (
+		file: File
+	) => Promise<{ width: number; height: number }>;
 	previewUrl?: string | null;
 	setPreviewUrl: (url: string | null) => void;
 }
@@ -19,6 +22,7 @@ export const Upload = ({
 	setValue,
 	onFileSelect,
 	// initialPreview,
+	getImageDimensions,
 	previewUrl,
 	setPreviewUrl,
 }: // selectedFile,
@@ -57,37 +61,35 @@ UploadProps) => {
 	});
 
 	// console.log(inputRef);
-	const getImageDimensions = (
-		file: File
-	): Promise<{ width: number; height: number }> => {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			img.src = URL.createObjectURL(file);
-			img.onload = () => {
-				resolve({ width: img.width, height: img.height });
-			};
-			img.onerror = () => {
-				reject(new Error('Failed to load image'));
-			};
-		});
-	};
+	// const getImageDimensions = (
+	// 	file: File
+	// ): Promise<{ width: number; height: number }> => {
+	// 	return new Promise((resolve, reject) => {
+	// 		const img = new Image();
+	// 		img.src = URL.createObjectURL(file);
+	// 		img.onload = () => {
+	// 			resolve({ width: img.width, height: img.height });
+	// 		};
+	// 		img.onerror = () => {
+	// 			reject(new Error('Failed to load image'));
+	// 		};
+	// 	});
+	// };
 
-	const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			const fileUrl = URL.createObjectURL(file);
-			setPreviewUrl(fileUrl);
-			onFileSelect(file);
+	// const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const file = e.target.files?.[0];
+	// 	if (file) {
+	// 		const fileUrl = URL.createObjectURL(file);
+	// 		setPreviewUrl(fileUrl);
+	// 		onFileSelect(file);
 
-			// Получаем реальные размеры изображения и обновляем поля формы
-			const { width, height } = await getImageDimensions(file);
-			// inputValue.current = e.target.value;
-			// console.log(e.target.value);
-			setValue('imageWidth', width);
-			setValue('imageHeight', height);
-			// setInputValue(e.target.value);
-		}
-	};
+	// 		// Получаем реальные размеры изображения и обновляем поля формы
+	// 		const { width, height } = await getImageDimensions(file);
+
+	// 		setValue('imageWidth', width);
+	// 		setValue('imageHeight', height);
+	// 	}
+	// };
 
 	// const handleRemoveImage = () => {
 	// 	setPreviewUrl(null);
@@ -103,7 +105,7 @@ UploadProps) => {
 	return (
 		<div className='upload-container'>
 			{/* Поле для выбора файла через кнопку отображается только если нет изображения */}
-			{!previewUrl && (
+			{/* {!previewUrl && (
 				<div className='relative mb-4 w-full'>
 					<input
 						type='file'
@@ -114,7 +116,7 @@ UploadProps) => {
 						style={{ paddingRight: '3rem' }}
 					/>
 				</div>
-			)}
+			)} */}
 
 			{/* Область Drag 'n' Drop или превью изображения */}
 			<div

@@ -294,6 +294,35 @@ export const StepModal = ({
 	const toggleLock = () => {
 		setIsLocked(!isLocked);
 	};
+	const getImageDimensions = (
+		file: File
+	): Promise<{ width: number; height: number }> => {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.src = URL.createObjectURL(file);
+			img.onload = () => {
+				resolve({ width: img.width, height: img.height });
+			};
+			img.onerror = () => {
+				reject(new Error('Failed to load image'));
+			};
+		});
+	};
+
+	const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			const fileUrl = URL.createObjectURL(file);
+			setPreviewUrl(fileUrl);
+			handleFileSelect(file);
+
+			// Получаем реальные размеры изображения и обновляем поля формы
+			const { width, height } = await getImageDimensions(file);
+
+			setValue('imageWidth', width);
+			setValue('imageHeight', height);
+		}
+	};
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
@@ -456,87 +485,128 @@ export const StepModal = ({
 									// setSelectedFile={setSelectedFile}
 									previewUrl={previewUrl || stepData.imageUrl}
 									setPreviewUrl={setPreviewUrl}
+									getImageDimensions={getImageDimensions}
 									// selectedFile={selectedFile}
 									// imageHeight={stepData.imageHeight || 200}
 									// imageWidth={stepData.imageWidth || 200}
 									// stepId={stepId ? Number(stepId) : 0}
 								/>
 							</div>
-							<div className='mb-4 flex space-x-4 items-center'>
-								<div className='w-1/5'>
-									<FormField
-										name='imageHeight'
-										control={control}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className='text-base font-medium text-gray-700'>
-													Height
-												</FormLabel>
-												<FormControl>
-													<Input
-														type='number'
-														{...field}
-														placeholder='Enter image height'
-														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-														value={field.value || 0}
-														onChange={e =>
-															handleHeightChange(Number(e.target.value))
-														}
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-								</div>
-								<Button
-									type='button'
-									variant='outline'
-									className='mt-5' // Отступ, чтобы кнопка выглядела ровно
-									onClick={toggleLock}
-								>
-									{isLocked ? (
-										<LockIcon className='w-5 h-5' />
-									) : (
-										<UnlockIcon className='w-5 h-5' />
-									)}
-								</Button>
-								<div className='w-1/5'>
-									<FormField
-										name='imageWidth'
-										control={control}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className='text-base font-medium text-gray-700'>
-													Width
-												</FormLabel>
-												<FormControl>
-													<Input
-														type='number'
-														{...field}
-														placeholder='Enter image width'
-														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-														value={field.value || 0}
-														onChange={e =>
-															handleWidthChange(Number(e.target.value))
-														}
-													/>
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-								</div>
-								{previewUrl && (
-									<Button
-										variant='destructive'
-										onClick={handleRemoveImage}
-										className='mt-5'
-									>
-										<TrashIcon className='w-5 h-5' />
-									</Button>
+
+							<div className='mb-4 flex items-center justify-between'>
+								{/* Левый блок — поле для добавления фото или кнопка удаления */}
+								{!previewUrl ? (
+									<div className='relative w-1/2'>
+										<input
+											type='file'
+											accept='image/*'
+											onChange={handleImageSelect}
+											className='p-2 border border-gray-300 rounded-md w-full'
+											ref={inputRef}
+											style={{ paddingRight: '3rem' }}
+										/>
+									</div>
+								) : (
+									<div className='w-1/2'>
+										<Button
+											variant='destructive'
+											onClick={handleRemoveImage}
+											className='flex items-center'
+										>
+											<TrashIcon className='w-5 h-5 mr-2' />
+											Delete Image
+										</Button>
+									</div>
 								)}
+
+								{/* Правый блок — поля для ширины и высоты, и кнопка блокировки */}
+								<div className='flex items-center space-x-2'>
+									{' '}
+									{/* Уменьшили отступы до space-x-2 */}
+									<div className='flex items-center'>
+										<FormField
+											name='imageHeight'
+											control={control}
+											render={({ field }) => (
+												<FormItem className='flex items-center'>
+													<FormLabel className='text-base font-medium text-gray-700 mr-1'>
+														H
+													</FormLabel>
+													<FormControl>
+														<Input
+															type='number'
+															{...field}
+															placeholder='Height'
+															className='w-20 border border-gray-300 rounded-md p-2'
+															value={field.value || 0}
+															onChange={e =>
+																handleHeightChange(Number(e.target.value))
+															}
+														/>
+													</FormControl>
+												</FormItem>
+											)}
+										/>
+									</div>
+									<div className='flex items-center'>
+										<FormField
+											name='imageWidth'
+											control={control}
+											render={({ field }) => (
+												<FormItem className='flex items-center'>
+													<FormLabel className='text-base font-medium text-gray-700 mr-1'>
+														W
+													</FormLabel>
+													<FormControl>
+														<Input
+															type='number'
+															{...field}
+															placeholder='Width'
+															className='w-20 border border-gray-300 rounded-md p-2'
+															value={field.value || 0}
+															onChange={e =>
+																handleWidthChange(Number(e.target.value))
+															}
+														/>
+													</FormControl>
+												</FormItem>
+											)}
+										/>
+									</div>
+									<Button type='button' variant='outline' onClick={toggleLock}>
+										{isLocked ? (
+											<LockIcon className='w-5 h-5' />
+										) : (
+											<UnlockIcon className='w-5 h-5' />
+										)}
+									</Button>
+								</div>
 							</div>
 						</>
 					)}
+					{/* {!previewUrl ? (
+						<div className='relative mb-4 w-full'>
+							<input
+								type='file'
+								accept='image/*'
+								onChange={handleImageSelect}
+								className='mt-2 p-2 border border-gray-300 rounded-md w-full'
+								ref={inputRef}
+								style={{ paddingRight: '3rem' }}
+							/>
+						</div>
+					) : (
+						<div className='ml-auto'>
+							<Button
+								variant='destructive'
+								onClick={handleRemoveImage}
+								className='mt-4'
+							>
+								<TrashIcon className='w-5 h-5 ' />
+								Delete Image
+							</Button>
+						</div>
+					)} */}
 
 					<div className='flex justify-end '>
 						<Button
