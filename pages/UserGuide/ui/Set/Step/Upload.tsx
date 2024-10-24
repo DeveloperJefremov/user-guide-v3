@@ -1,29 +1,39 @@
-import { Button } from '@/components/ui/button';
 import { CreateStepInput } from '@/lib/zod/stepSchema';
-import { TrashIcon } from 'lucide-react';
+
 import React, { useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UseFormSetValue } from 'react-hook-form';
 
 interface UploadProps {
 	onFileSelect: (file: File | null) => void;
-	initialPreview?: string | null;
+	// initialPreview?: string | null;
 	setValue: UseFormSetValue<CreateStepInput>; // Обновляем тип setValue
 	// imageHeight: number;
 	// imageWidth: number;
+	// selectedFile?: File | null;
+	previewUrl?: string | null;
+	setPreviewUrl: (url: string | null) => void;
 }
 
 export const Upload = ({
 	setValue,
 	onFileSelect,
-	initialPreview,
-}: // imageHeight,
+	// initialPreview,
+	previewUrl,
+	setPreviewUrl,
+}: // selectedFile,
+// imageHeight,
 // imageWidth,
 UploadProps) => {
-	const [previewUrl, setPreviewUrl] = useState<string | null>(
-		initialPreview || null
-	);
+	// const [previewUrl, setPreviewUrl] = useState<string | null>(
+	// 	initialPreview || null
+	// );
 	const inputRef = useRef<HTMLInputElement | null>(null);
+	// const [inputValue, setInputValue] = useState<string>('');
+
+	// if (inputRef.current !== null && inputValue !== '') {
+	// 	inputRef.current.value = inputValue;
+	// }
 
 	const onDrop = async (acceptedFiles: File[]) => {
 		const file = acceptedFiles[0];
@@ -46,6 +56,7 @@ UploadProps) => {
 		noClick: true, // Отключаем возможность клика
 	});
 
+	// console.log(inputRef);
 	const getImageDimensions = (
 		file: File
 	): Promise<{ width: number; height: number }> => {
@@ -61,7 +72,7 @@ UploadProps) => {
 		});
 	};
 
-	const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
 			const fileUrl = URL.createObjectURL(file);
@@ -70,42 +81,40 @@ UploadProps) => {
 
 			// Получаем реальные размеры изображения и обновляем поля формы
 			const { width, height } = await getImageDimensions(file);
+			// inputValue.current = e.target.value;
+			// console.log(e.target.value);
 			setValue('imageWidth', width);
 			setValue('imageHeight', height);
+			// setInputValue(e.target.value);
 		}
 	};
 
-	const handleRemoveImage = () => {
-		setPreviewUrl(null);
+	// const handleRemoveImage = () => {
+	// 	setPreviewUrl(null);
 
-		onFileSelect(null);
-		if (inputRef.current) {
-			inputRef.current.value = '';
-		}
-	};
+	// 	onFileSelect(null);
+	// 	if (inputRef.current) {
+	// 		inputRef.current.value = '';
+	// 	}
+	// 	setValue('imageHeight', 0);
+	// 	setValue('imageWidth', 0);
+	// };
 
 	return (
 		<div className='upload-container'>
-			{/* Поле для выбора файла через кнопку */}
-			<div className='relative mb-4 w-full '>
-				<input
-					type='file'
-					accept='image/*'
-					onChange={handleFileSelect}
-					className='mt-2 p-2 border border-gray-300 rounded-md w-full'
-					ref={inputRef}
-					style={{ paddingRight: '3rem' }}
-				/>
-				{previewUrl && (
-					<Button
-						variant='destructive'
-						onClick={handleRemoveImage}
-						className='absolute top-2 right-2 size-xs'
-					>
-						<TrashIcon className='w-5 h-5' />
-					</Button>
-				)}
-			</div>
+			{/* Поле для выбора файла через кнопку отображается только если нет изображения */}
+			{!previewUrl && (
+				<div className='relative mb-4 w-full'>
+					<input
+						type='file'
+						accept='image/*'
+						onChange={handleImageSelect}
+						className='mt-2 p-2 border border-gray-300 rounded-md w-full'
+						ref={inputRef}
+						style={{ paddingRight: '3rem' }}
+					/>
+				</div>
+			)}
 
 			{/* Область Drag 'n' Drop или превью изображения */}
 			<div
@@ -131,15 +140,17 @@ UploadProps) => {
 					</>
 				)}
 				{previewUrl && (
-					<img
-						src={previewUrl}
-						alt='Preview'
-						style={{
-							// width: `${imageWidth}px`,
-							// height: `${imageHeight}px`,
-							objectFit: 'contain',
-						}}
-					/>
+					<div className='image-preview-container'>
+						<img
+							src={previewUrl}
+							alt='Preview'
+							style={{
+								objectFit: 'contain',
+								maxWidth: '100%',
+								maxHeight: '100%',
+							}}
+						/>
+					</div>
 				)}
 			</div>
 		</div>

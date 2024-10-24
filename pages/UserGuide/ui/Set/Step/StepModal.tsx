@@ -20,6 +20,7 @@ import { DevTool } from '@hookform/devtools';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Step } from '@prisma/client';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { LockIcon, TrashIcon, UnlockIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { Upload } from './Upload';
@@ -50,6 +51,7 @@ export const StepModal = ({
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+	const [isLocked, setIsLocked] = useState<boolean>(true);
 
 	const isEditing = Boolean(initialData);
 
@@ -151,8 +153,8 @@ export const StepModal = ({
 					elementId: data.elementId || '',
 					imageChecked: data.imageChecked ?? false,
 					pageUrl: data.pageUrl || '',
-					imageHeight: data.imageHeight ?? 200,
-					imageWidth: data.imageWidth ?? 200,
+					imageHeight: data.imageHeight ?? 0,
+					imageWidth: data.imageWidth ?? 0,
 				};
 				setStepData(validatedData);
 			});
@@ -202,12 +204,12 @@ export const StepModal = ({
 	};
 
 	const handleFileSelect = async (file: File | null) => {
-		// debugger;
 		const previewKey = getPreviewUrlKey(setId, stepId);
 		setSelectedFile(file);
 		if (file) {
 			const fileBase64 = await convertFileToBase64(file);
 			setValue('imageUrl', fileBase64);
+
 			setPreviewUrl(fileBase64);
 			localStorage.setItem(previewKey, fileBase64); // Сохраняем для уникального шага
 		} else {
@@ -256,38 +258,42 @@ export const StepModal = ({
 		onClose();
 	};
 
-	// Универсальная функция для дебаунса
-	const debounce = (fn: (value: number) => void, delay: number) => {
-		return (value: number) => {
-			if (debounceRef.current) {
-				clearTimeout(debounceRef.current);
-			}
-
-			debounceRef.current = setTimeout(() => {
-				fn(value);
-			}, delay);
-		};
-	};
-
 	// Функции для изменения ширины и высоты
 	const handleWidthChange = (value: number) => {
-		const newHeight = Math.round((value * 9) / 16);
-		setValue('imageWidth', value);
-		setValue('imageHeight', newHeight);
+		if (isLocked) {
+			const newHeight = Math.round((value * 9) / 16);
+			setValue('imageWidth', value);
+			setValue('imageHeight', newHeight);
+		} else {
+			setValue('imageWidth', value);
+		}
 	};
 
 	const handleHeightChange = (value: number) => {
-		const newWidth = Math.round((value * 16) / 9);
-		setValue('imageHeight', value);
-		setValue('imageWidth', newWidth);
+		if (isLocked) {
+			const newWidth = Math.round((value * 16) / 9);
+			setValue('imageHeight', value);
+			setValue('imageWidth', newWidth);
+		} else {
+			setValue('imageHeight', value);
+		}
 	};
 
-	// Использование универсальной функции debounce
-	const handleWidthChangeDebounced = debounce(handleWidthChange, 300);
-	const handleHeightChangeDebounced = debounce(handleHeightChange, 300);
+	const handleRemoveImage = () => {
+		setPreviewUrl(null);
+		setValue('imageUrl', ''); // Сбрасываем URL картинки
+		setValue('imageHeight', undefined); // Сбрасываем высоту
+		setValue('imageWidth', undefined); // Сбрасываем ширину
+		// setValue('imageChecked', false);
+		setSelectedFile(null);
+		if (inputRef.current) {
+			inputRef.current.value = ''; // Очищаем input
+		}
+	};
 
-	// Дебаунс с использованием useRef и setTimeout
-	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const toggleLock = () => {
+		setIsLocked(!isLocked);
+	};
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose}>
@@ -448,21 +454,23 @@ export const StepModal = ({
 									setValue={setValue}
 									onFileSelect={handleFileSelect}
 									// setSelectedFile={setSelectedFile}
-									initialPreview={previewUrl || stepData.imageUrl}
+									previewUrl={previewUrl || stepData.imageUrl}
+									setPreviewUrl={setPreviewUrl}
+									// selectedFile={selectedFile}
 									// imageHeight={stepData.imageHeight || 200}
 									// imageWidth={stepData.imageWidth || 200}
 									// stepId={stepId ? Number(stepId) : 0}
 								/>
 							</div>
-							<div className='mb-4 flex space-x-4'>
-								<div className='w-1/2'>
+							<div className='mb-4 flex space-x-4 items-center'>
+								<div className='w-1/5'>
 									<FormField
 										name='imageHeight'
 										control={control}
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel className='text-base font-medium text-gray-700'>
-													Image Height
+													Height
 												</FormLabel>
 												<FormControl>
 													<Input
@@ -472,9 +480,7 @@ export const StepModal = ({
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
 														value={field.value || 0}
 														onChange={e =>
-															handleHeightChangeDebounced(
-																Number(e.target.value)
-															)
+															handleHeightChange(Number(e.target.value))
 														}
 													/>
 												</FormControl>
@@ -482,15 +488,26 @@ export const StepModal = ({
 										)}
 									/>
 								</div>
-
-								<div className='w-1/2'>
+								<Button
+									type='button'
+									variant='outline'
+									className='mt-5' // Отступ, чтобы кнопка выглядела ровно
+									onClick={toggleLock}
+								>
+									{isLocked ? (
+										<LockIcon className='w-5 h-5' />
+									) : (
+										<UnlockIcon className='w-5 h-5' />
+									)}
+								</Button>
+								<div className='w-1/5'>
 									<FormField
 										name='imageWidth'
 										control={control}
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel className='text-base font-medium text-gray-700'>
-													Image Width
+													Width
 												</FormLabel>
 												<FormControl>
 													<Input
@@ -500,7 +517,7 @@ export const StepModal = ({
 														className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
 														value={field.value || 0}
 														onChange={e =>
-															handleWidthChangeDebounced(Number(e.target.value))
+															handleWidthChange(Number(e.target.value))
 														}
 													/>
 												</FormControl>
@@ -508,11 +525,20 @@ export const StepModal = ({
 										)}
 									/>
 								</div>
+								{previewUrl && (
+									<Button
+										variant='destructive'
+										onClick={handleRemoveImage}
+										className='mt-5'
+									>
+										<TrashIcon className='w-5 h-5' />
+									</Button>
+								)}
 							</div>
 						</>
 					)}
 
-					<div className='flex justify-end'>
+					<div className='flex justify-end '>
 						<Button
 							type='button'
 							variant='outline'
