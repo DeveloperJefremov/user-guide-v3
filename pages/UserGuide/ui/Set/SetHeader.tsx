@@ -3,6 +3,7 @@ import { Set, Status } from '@prisma/client';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 import React from 'react';
 import { updateSetStatus } from '../../data/set';
+import { StatusBadge } from './StatusBadge';
 import { StatusSelector } from './StatusSelector';
 
 interface SetHeaderProps {
@@ -53,11 +54,8 @@ export const SetHeader = ({
 	return (
 		<header className=' p-4 flex justify-between items-center'>
 			<div className='flex items-center'>
-				<h2 className='text-xl font-bold'>{setTitle}</h2>
-				<StatusSelector
-					currentStatus={status}
-					onChangeStatus={handleStatusChange}
-				/>
+				<h2 className='text-xl font-bold mr-3'>{setTitle}</h2>
+				<StatusBadge status={status} />
 			</div>
 			<div className='flex space-x-2'>
 				<Button variant='default' onClick={handleEdit}>

@@ -34,7 +34,7 @@ export async function createSet(data: SetWithSteps): Promise<SetWithSteps> {
 		data: {
 			title: parsedData.data.title,
 			userId: 1, // Замените на реальный userId после настройки аутентификации
-			status: 'EMPTY', // Или другой статус по умолчанию
+			status: parsedData.data.status,
 		},
 		include: {
 			steps: {
@@ -74,6 +74,7 @@ export async function updateSet(
 			where: { id: setId },
 			data: {
 				title: parsedData.data.title,
+				status: parsedData.data.status,
 			},
 			include: {
 				steps: {

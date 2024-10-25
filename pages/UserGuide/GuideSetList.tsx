@@ -55,6 +55,9 @@ export const GuideSetList = () => {
 			await deleteSet(setId);
 			localStorage.removeItem(`editSetTitle_${setId}`);
 			localStorage.removeItem(`newStep_${setId}`);
+			// localStorage.removeItem(`editStep_${setId}_${stepId}`);
+			localStorage.removeItem(`previewUrl_${setId}_new`);
+			// localStorage.removeItem(`previewUrl_${setId}_${stepId}`);
 		} catch (error) {
 			setSets(previousSets);
 			console.error('Ошибка при удалении сета:', error);

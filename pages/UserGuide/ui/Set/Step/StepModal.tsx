@@ -496,7 +496,7 @@ export const StepModal = ({
 							<div className='mb-4 flex items-center justify-between'>
 								{/* Левый блок — поле для добавления фото или кнопка удаления */}
 								{!previewUrl ? (
-									<div className='relative w-1/2'>
+									<div className='relative w-1/2 mr-4 mt-2 h-10'>
 										<input
 											type='file'
 											accept='image/*'
@@ -507,11 +507,11 @@ export const StepModal = ({
 										/>
 									</div>
 								) : (
-									<div className='w-1/2'>
+									<div className='w-1/ mr-4'>
 										<Button
 											variant='destructive'
 											onClick={handleRemoveImage}
-											className='flex items-center'
+											className='flex items-center mt-2 h-10'
 										>
 											<TrashIcon className='w-5 h-5 mr-2' />
 											Delete Image
@@ -521,15 +521,13 @@ export const StepModal = ({
 
 								{/* Правый блок — поля для ширины и высоты, и кнопка блокировки */}
 								<div className='flex items-center space-x-2'>
-									{' '}
-									{/* Уменьшили отступы до space-x-2 */}
 									<div className='flex items-center'>
 										<FormField
 											name='imageHeight'
 											control={control}
 											render={({ field }) => (
 												<FormItem className='flex items-center'>
-													<FormLabel className='text-base font-medium text-gray-700 mr-1'>
+													<FormLabel className='text-base font-medium text-gray-700 mr-2'>
 														H
 													</FormLabel>
 													<FormControl>
@@ -554,7 +552,7 @@ export const StepModal = ({
 											control={control}
 											render={({ field }) => (
 												<FormItem className='flex items-center'>
-													<FormLabel className='text-base font-medium text-gray-700 mr-1'>
+													<FormLabel className='text-base font-medium text-gray-700 mr-2'>
 														W
 													</FormLabel>
 													<FormControl>
@@ -573,9 +571,14 @@ export const StepModal = ({
 											)}
 										/>
 									</div>
-									<Button type='button' variant='outline' onClick={toggleLock}>
+									<Button
+										type='button'
+										variant='outline'
+										onClick={toggleLock}
+										className='mt-2'
+									>
 										{isLocked ? (
-											<LockIcon className='w-5 h-5' />
+											<LockIcon className='w-5 h-5 ' />
 										) : (
 											<UnlockIcon className='w-5 h-5' />
 										)}

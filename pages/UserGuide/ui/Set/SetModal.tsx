@@ -12,18 +12,19 @@ import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
 import { SetWithSteps } from '@/lib/types/types';
 import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Set } from '@prisma/client';
+import { Set as SetModel, Status } from '@prisma/client';
 import React, { useEffect, useRef } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { createSet, updateSet } from '../../data/set';
 import { Modal } from '../../shared/Modal';
+import { StatusSelector } from './StatusSelector';
 
 interface SetModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onSetCreated: (newSet: SetWithSteps) => void;
 	onSetUpdated: (updatedSet: SetWithSteps) => void;
-	initialData?: Set | null;
+	initialData?: SetModel | null;
 }
 
 export function SetModal({
@@ -43,10 +44,11 @@ export function SetModal({
 		initialData?.title || ''
 	);
 
-	const methods = useForm<SetWithSteps>({
+	const methods = useForm<CreateSetInput>({
 		resolver: zodResolver(createSetSchema),
 		defaultValues: {
 			title: titleValue,
+			status: initialData?.status || Status.DRAFT, // Устанавливаем DRAFT как статус по умолчанию
 		},
 	});
 
@@ -57,7 +59,7 @@ export function SetModal({
 		formState: { errors },
 	} = methods;
 
-	const inputRef = useRef<HTMLInputElement | null>(null); // Добавляем useRef для первого поля
+	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	useEffect(() => {
 		reset({ title: titleValue });
@@ -65,17 +67,27 @@ export function SetModal({
 
 	useEffect(() => {
 		if (isOpen && inputRef.current) {
-			inputRef.current.focus(); // Устанавливаем фокус на первое поле при открытии модалки
+			inputRef.current.focus();
 		}
 	}, [isOpen]);
 
-	const onSubmit = async (data: SetWithSteps) => {
+	const onSubmit = async (data: CreateSetInput) => {
 		try {
+			const dataWithDefaults: SetWithSteps = {
+				...data,
+				id: 0,
+				order: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				userId: 0,
+				steps: [],
+			};
+
 			if (isEditing && initialData) {
-				const updatedSet = await updateSet(initialData.id, data);
+				const updatedSet = await updateSet(initialData.id, dataWithDefaults);
 				onSetUpdated(updatedSet);
 			} else {
-				const newSet = await createSet(data);
+				const newSet = await createSet(dataWithDefaults);
 				onSetCreated(newSet);
 			}
 			removeTitleValue();
@@ -110,12 +122,32 @@ export function SetModal({
 										value={titleValue}
 										onChange={handleTitleChange}
 										className='mt-2'
-										ref={inputRef} // Присваиваем ref для автофокуса
+										ref={inputRef}
 									/>
 								</FormControl>
 								{errors.title && (
 									<FormMessage className='text-red-500 text-sm mt-2'>
 										{(errors.title as any).message}
+									</FormMessage>
+								)}
+							</FormItem>
+						)}
+					/>
+
+					{/* Интегрируем компонент StatusSelector */}
+					<Controller
+						name='status'
+						control={control}
+						render={({ field }) => (
+							<FormItem className='mb-6'>
+								<FormLabel>Status</FormLabel>
+								<StatusSelector
+									currentStatus={field.value as Status}
+									onChangeStatus={field.onChange}
+								/>
+								{errors.status && (
+									<FormMessage className='text-red-500 text-sm mt-2'>
+										{(errors.status as any).message}
 									</FormMessage>
 								)}
 							</FormItem>
@@ -134,7 +166,9 @@ export function SetModal({
 						>
 							Cancel
 						</Button>
-						<Button type='submit'>{isEditing ? 'Update' : 'Create'}</Button>
+						<Button variant='default' type='submit' className='btn'>
+							{isEditing ? 'Update' : 'Create'}
+						</Button>
 					</div>
 				</form>
 			</FormProvider>

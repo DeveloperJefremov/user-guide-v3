@@ -1,4 +1,4 @@
-import { Set, Status } from '@prisma/client';
+import { Status } from '@prisma/client';
 import { useState } from 'react';
 
 import { SetWithSteps } from '@/lib/types/types';
