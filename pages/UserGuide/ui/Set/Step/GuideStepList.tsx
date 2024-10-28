@@ -144,6 +144,7 @@ export const GuideStepsList = ({
 							className='border p-4 rounded-lg shadow-sm'
 						>
 							<GuideStep
+								setId={setId}
 								step={step}
 								onStepDeleted={handleStepDeleted}
 								onStepEdited={handleStepEdited}

@@ -7,12 +7,14 @@ import StepHeader from './StepHeader';
 
 interface GuideStepProps {
 	step: Step;
+	setId: number;
 	onStepDeleted: (stepId: number) => void;
 	onStepEdited: (step: Step) => void;
 }
 
 export const GuideStep = ({
 	step,
+	setId,
 	onStepDeleted,
 	onStepEdited,
 }: GuideStepProps) => {
@@ -22,8 +24,17 @@ export const GuideStep = ({
 		setIsExpanded(prev => !prev);
 	};
 
+	const clearLocalStorageForStep = (setId: number, stepId: number) => {
+		const editKey = `editStep_${setId}_${stepId}`;
+		const previewKey = `previewUrl_${setId}_${stepId}`;
+
+		localStorage.removeItem(editKey);
+		localStorage.removeItem(previewKey);
+	};
+
 	const handleDelete = () => {
 		onStepDeleted(step.id);
+		clearLocalStorageForStep(setId, step.id);
 	};
 	const handleEdit = () => {
 		onStepEdited(step); // Передаем шаг для редактирования
