@@ -1,7 +1,9 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { storage } from '@/lib/store/firebase';
 import { Step } from '@prisma/client';
+import { deleteObject, ref } from 'firebase/storage';
 import { Reorder } from 'framer-motion';
 import React, { useState } from 'react';
 import {
@@ -18,6 +20,7 @@ interface GuideStepsListProps {
 	setId: number;
 	isLaunching: boolean;
 	setIsLaunching: (isLaunching: boolean) => void;
+	deleteImageFromStorage: (imageUrl: string) => void;
 }
 
 export const GuideStepsList = ({
@@ -25,6 +28,7 @@ export const GuideStepsList = ({
 	setId,
 	isLaunching,
 	setIsLaunching,
+	deleteImageFromStorage,
 }: GuideStepsListProps) => {
 	const [localSteps, setLocalSteps] = useState<Step[]>(steps);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -66,10 +70,31 @@ export const GuideStepsList = ({
 		setSelectedStep(null);
 	};
 
+	// const deleteImageFromStorage = async (imageUrl: string) => {
+	// 	try {
+	// 		const fileRef = ref(storage, imageUrl);
+	// 		await deleteObject(fileRef);
+	// 		console.log('Изображение успешно удалено из Firebase Storage');
+	// 	} catch (error) {
+	// 		console.error(
+	// 			'Ошибка при удалении изображения из Firebase Storage:',
+	// 			error
+	// 		);
+	// 	}
+	// };
+
 	const handleStepDeleted = async (stepId: number) => {
 		try {
+			const stepToDelete = localSteps.find(step => step.id === stepId);
+
+			if (stepToDelete?.imageUrl) {
+				await deleteImageFromStorage(stepToDelete.imageUrl);
+			}
+
+			// Удаляем шаг из базы данных
 			await deleteStep(stepId);
 
+			// Обновляем список шагов и их порядок
 			const updatedSteps = localSteps
 				.filter(step => step.id !== stepId)
 				.map((step, index) => ({ ...step, order: index + 1 }));

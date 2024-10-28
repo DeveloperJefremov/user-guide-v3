@@ -1,8 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { storage } from '@/lib/store/firebase';
 import { SetWithSteps } from '@/lib/types/types';
 import { Status } from '@prisma/client';
+import { deleteObject, ref } from 'firebase/storage';
 import { Reorder } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { deleteSet, getGuideSets, updateSetsOrder } from './data/set';
@@ -48,16 +50,49 @@ export const GuideSetList = () => {
 		setSelectedSet(null);
 	};
 
+	const deleteImageFromStorage = async (imageUrl: string) => {
+		try {
+			const fileRef = ref(storage, imageUrl);
+			await deleteObject(fileRef);
+			console.log('Изображение успешно удалено из Firebase Storage');
+		} catch (error) {
+			console.error(
+				'Ошибка при удалении изображения из Firebase Storage:',
+				error
+			);
+		}
+	};
+
 	const handleDeleteSet = async (setId: number) => {
 		const previousSets = sets;
+		const setToDelete = sets.find(set => set.id === setId);
+
+		// Удаление всех изображений шагов, если они существуют
+		if (setToDelete) {
+			for (const step of setToDelete.steps) {
+				if (step.imageUrl) {
+					await deleteImageFromStorage(step.imageUrl);
+				}
+			}
+		}
+
 		setSets(prevSets => prevSets.filter(set => set.id !== setId));
+
 		try {
 			await deleteSet(setId);
+
+			// Очистка данных localStorage для сета и его шагов
 			localStorage.removeItem(`editSetTitle_${setId}`);
 			localStorage.removeItem(`newStep_${setId}`);
-			// localStorage.removeItem(`editStep_${setId}_${stepId}`);
 			localStorage.removeItem(`previewUrl_${setId}_new`);
-			// localStorage.removeItem(`previewUrl_${setId}_${stepId}`);
+
+			// Дополнительно можно пройтись по шагам и удалить данные для каждого шага, если они есть
+			if (setToDelete) {
+				for (const step of setToDelete.steps) {
+					localStorage.removeItem(`editStep_${setId}_${step.id}`);
+					localStorage.removeItem(`previewUrl_${setId}_${step.id}`);
+				}
+			}
 		} catch (error) {
 			setSets(previousSets);
 			console.error('Ошибка при удалении сета:', error);
@@ -113,6 +148,7 @@ export const GuideSetList = () => {
 							set={set}
 							onDelete={handleDeleteSet}
 							onEdit={handleEditSet}
+							deleteImageFromStorage={deleteImageFromStorage}
 						/>
 					</Reorder.Item>
 				))}

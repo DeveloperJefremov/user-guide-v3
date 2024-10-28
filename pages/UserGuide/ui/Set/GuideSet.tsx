@@ -11,6 +11,7 @@ interface GuideSetProps {
 	onDelete: (setId: number) => void;
 	onEdit: (set: SetWithSteps) => void;
 	onChangeStatus?: (setId: number, newStatus: Status) => void;
+	deleteImageFromStorage: (imagePath: string) => void;
 }
 
 export const GuideSet = ({
@@ -18,6 +19,7 @@ export const GuideSet = ({
 	onDelete,
 	onEdit,
 	onChangeStatus,
+	deleteImageFromStorage,
 }: GuideSetProps) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 	const [isLaunching, setIsLaunching] = useState<boolean>(false);
@@ -67,6 +69,7 @@ export const GuideSet = ({
 						setId={set.id}
 						isLaunching={isLaunching}
 						setIsLaunching={setIsLaunching}
+						deleteImageFromStorage={deleteImageFromStorage}
 					/>
 					<SetFooter onLaunch={handleLaunch} />
 				</div>
