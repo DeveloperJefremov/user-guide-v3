@@ -27,10 +27,10 @@ export const createStepSchema = z
 		data => {
 			if (data.imageChecked) {
 				return (
-					data.imageHeight &&
-					data.imageWidth &&
-					data.imageHeight > 0 &&
-					data.imageWidth > 0
+					data.imageHeight !== undefined &&
+					data.imageWidth !== undefined &&
+					data.imageHeight >= 0 &&
+					data.imageWidth >= 0
 				);
 			}
 			return true;

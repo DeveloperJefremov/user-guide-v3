@@ -286,6 +286,10 @@ export const StepModal = ({
 		setValue('imageWidth', undefined); // Сбрасываем ширину
 		// setValue('imageChecked', false);
 		setSelectedFile(null);
+
+		const previewKey = getPreviewUrlKey(setId, stepId);
+		localStorage.removeItem(previewKey);
+
 		if (inputRef.current) {
 			inputRef.current.value = ''; // Очищаем input
 		}
@@ -482,20 +486,27 @@ export const StepModal = ({
 								<Upload
 									setValue={setValue}
 									onFileSelect={handleFileSelect}
-									// setSelectedFile={setSelectedFile}
 									previewUrl={previewUrl || stepData.imageUrl}
 									setPreviewUrl={setPreviewUrl}
 									getImageDimensions={getImageDimensions}
-									// selectedFile={selectedFile}
-									// imageHeight={stepData.imageHeight || 200}
-									// imageWidth={stepData.imageWidth || 200}
-									// stepId={stepId ? Number(stepId) : 0}
 								/>
 							</div>
 
 							<div className='mb-4 flex items-center justify-between'>
-								{/* Левый блок — поле для добавления фото или кнопка удаления */}
-								{!previewUrl ? (
+								{/* Отображаем кнопку удаления только если изображение загружено */}
+								{previewUrl || stepData.imageUrl ? (
+									<div className='w-1/ mr-4'>
+										<Button
+											// type='button'
+											variant='destructive'
+											onClick={handleRemoveImage}
+											className='flex items-center mt-2 h-10'
+										>
+											<TrashIcon className='w-5 h-5 mr-2' />
+											Delete Image
+										</Button>
+									</div>
+								) : (
 									<div className='relative w-1/2 mr-4 mt-2 h-10'>
 										<input
 											type='file'
@@ -505,17 +516,6 @@ export const StepModal = ({
 											ref={inputRef}
 											style={{ paddingRight: '3rem' }}
 										/>
-									</div>
-								) : (
-									<div className='w-1/ mr-4'>
-										<Button
-											variant='destructive'
-											onClick={handleRemoveImage}
-											className='flex items-center mt-2 h-10'
-										>
-											<TrashIcon className='w-5 h-5 mr-2' />
-											Delete Image
-										</Button>
 									</div>
 								)}
 
@@ -587,29 +587,6 @@ export const StepModal = ({
 							</div>
 						</>
 					)}
-					{/* {!previewUrl ? (
-						<div className='relative mb-4 w-full'>
-							<input
-								type='file'
-								accept='image/*'
-								onChange={handleImageSelect}
-								className='mt-2 p-2 border border-gray-300 rounded-md w-full'
-								ref={inputRef}
-								style={{ paddingRight: '3rem' }}
-							/>
-						</div>
-					) : (
-						<div className='ml-auto'>
-							<Button
-								variant='destructive'
-								onClick={handleRemoveImage}
-								className='mt-4'
-							>
-								<TrashIcon className='w-5 h-5 ' />
-								Delete Image
-							</Button>
-						</div>
-					)} */}
 
 					<div className='flex justify-end '>
 						<Button

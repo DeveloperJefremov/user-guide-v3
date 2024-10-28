@@ -54,7 +54,6 @@ export const GuideSetList = () => {
 		try {
 			const fileRef = ref(storage, imageUrl);
 			await deleteObject(fileRef);
-			console.log('Изображение успешно удалено из Firebase Storage');
 		} catch (error) {
 			console.error(
 				'Ошибка при удалении изображения из Firebase Storage:',

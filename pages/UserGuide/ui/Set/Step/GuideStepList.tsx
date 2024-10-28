@@ -70,19 +70,6 @@ export const GuideStepsList = ({
 		setSelectedStep(null);
 	};
 
-	// const deleteImageFromStorage = async (imageUrl: string) => {
-	// 	try {
-	// 		const fileRef = ref(storage, imageUrl);
-	// 		await deleteObject(fileRef);
-	// 		console.log('Изображение успешно удалено из Firebase Storage');
-	// 	} catch (error) {
-	// 		console.error(
-	// 			'Ошибка при удалении изображения из Firebase Storage:',
-	// 			error
-	// 		);
-	// 	}
-	// };
-
 	const handleStepDeleted = async (stepId: number) => {
 		try {
 			const stepToDelete = localSteps.find(step => step.id === stepId);
