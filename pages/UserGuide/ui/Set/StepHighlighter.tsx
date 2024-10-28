@@ -44,7 +44,8 @@ export const StepHighlighter = ({
 				trigger: 'manual',
 				placement: 'right',
 				interactive: true,
-				arrow: false, // Отключаем стрелку тултипа
+				hideOnClick: false, // Теперь тултип закрывается только вручную
+				arrow: false,
 			});
 
 			instance.show();
