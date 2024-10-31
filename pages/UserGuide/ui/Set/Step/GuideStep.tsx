@@ -1,9 +1,9 @@
 'use client';
 
-import { Step } from '@prisma/client';
-import Image from 'next/image';
-import React, { useState } from 'react';
-import StepHeader from './StepHeader';
+import { Step } from '@prisma/client'
+import Image from 'next/image'
+import React, { useState } from 'react'
+import StepHeader from './StepHeader'
 
 interface GuideStepProps {
 	step: Step;
@@ -63,7 +63,7 @@ export const GuideStep = ({
 						)}
 
 						<p className='text-gray-500 mt-2'>Element ID: {step.elementId}</p>
-						<p className='text-gray-500'>Page URL: {step.pageUrl}</p>
+						{/* <p className='text-gray-500'>Page URL: {step.pageUrl}</p> */}
 
 						{step.imageUrl && (
 							<div className='mt-2'>

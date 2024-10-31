@@ -32,13 +32,13 @@ export interface User {
 export interface Set {
 	id: number;
 	title: string;
+	pageUrl: string;
 	status: Status;
 	order: number;
 	createdAt: Date;
 	updatedAt: Date;
-	userId: number;
-	user?: User; // Пользователь, которому принадлежит набор
-	steps?: Step[]; // Массив шагов в наборе
+	userId: number | null;
+	user?: User;
 }
 
 export interface SetWithSteps extends Set {
@@ -57,7 +57,7 @@ export interface Step {
 	imageChecked: boolean;
 	imageHeight: number | null;
 	imageWidth: number | null;
-	pageUrl: string;
+	// pageUrl: string;
 	createdAt: Date;
 	updatedAt: Date;
 	// set?: Set;

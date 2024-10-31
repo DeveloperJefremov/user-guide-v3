@@ -1,9 +1,9 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/store/firebase';
+
 import { Step } from '@prisma/client';
-import { deleteObject, ref } from 'firebase/storage';
+
 import { Reorder } from 'framer-motion';
 import React, { useState } from 'react';
 import {

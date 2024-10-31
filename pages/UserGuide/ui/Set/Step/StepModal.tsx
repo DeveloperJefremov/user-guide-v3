@@ -77,7 +77,7 @@ export const StepModal = ({
 						imageChecked: initialData.imageChecked,
 						imageHeight: initialData.imageHeight ?? 0,
 						imageWidth: initialData.imageWidth ?? 0,
-						pageUrl: initialData.pageUrl,
+						// pageUrl: initialData.pageUrl,
 						setId: initialData.setId,
 				  }
 				: {
@@ -89,7 +89,7 @@ export const StepModal = ({
 						imageChecked: false,
 						imageHeight: 0,
 						imageWidth: 0,
-						pageUrl: '',
+						// pageUrl: '',
 						setId: setId,
 				  }
 		);
@@ -152,7 +152,7 @@ export const StepModal = ({
 					order: data.order ?? 1,
 					elementId: data.elementId || '',
 					imageChecked: data.imageChecked ?? false,
-					pageUrl: data.pageUrl || '',
+					// pageUrl: data.pageUrl || '',
 					imageHeight: data.imageHeight ?? 0,
 					imageWidth: data.imageWidth ?? 0,
 				};
@@ -433,7 +433,7 @@ export const StepModal = ({
 						/>
 					</div>
 
-					<div className='mb-4'>
+					{/* <div className='mb-4'>
 						<FormField
 							name='pageUrl'
 							control={control}
@@ -455,7 +455,7 @@ export const StepModal = ({
 								</FormItem>
 							)}
 						/>
-					</div>
+					</div> */}
 
 					<div className='mb-4'>
 						<FormField

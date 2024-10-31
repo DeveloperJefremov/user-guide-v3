@@ -100,7 +100,7 @@ export const StepHighlighter = ({
 					<p className='text-sm'>
 						Element ID: {steps[currentStepIndex].elementId}
 					</p>
-					<p className='text-sm'>Page URL: {steps[currentStepIndex].pageUrl}</p>
+					{/* <p className='text-sm'>Page URL: {steps[currentStepIndex].pageUrl}</p> */}
 
 					{/* Отображение изображения, если оно есть */}
 					{steps[currentStepIndex].imageUrl && (

@@ -31,6 +31,7 @@ export const SetHeader = ({
 		onEdit({
 			id: setId,
 			title: setTitle,
+			pageUrl: '',
 			status: status,
 			order: 0,
 			createdAt: new Date(),

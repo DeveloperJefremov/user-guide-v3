@@ -33,7 +33,8 @@ export async function createSet(data: SetWithSteps): Promise<SetWithSteps> {
 	const newSet = await prisma.set.create({
 		data: {
 			title: parsedData.data.title,
-			userId: 1, // Замените на реальный userId после настройки аутентификации
+			pageUrl: parsedData.data.pageUrl,
+			// userId: 1,
 			status: parsedData.data.status,
 		},
 		include: {

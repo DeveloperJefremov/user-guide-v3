@@ -35,7 +35,7 @@ export async function createStep(data: CreateStepInput) {
 				imageChecked: parsedData.data.imageChecked,
 				imageHeight: parsedData.data.imageHeight,
 				imageWidth: parsedData.data.imageWidth,
-				pageUrl: parsedData.data.pageUrl,
+				// pageUrl: parsedData.data.pageUrl,
 			},
 		});
 		return newStep;
@@ -77,7 +77,7 @@ export async function updateStep(stepId: number, data: CreateStepInput) {
 				imageChecked: parsedData.data.imageChecked,
 				imageHeight: parsedData.data.imageHeight,
 				imageWidth: parsedData.data.imageWidth,
-				pageUrl: parsedData.data.pageUrl,
+				// pageUrl: parsedData.data.pageUrl,
 			},
 		});
 		return updatedStep;

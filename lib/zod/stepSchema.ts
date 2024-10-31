@@ -14,14 +14,13 @@ export const createStepSchema = z
 		imageUrl: z.string().url('Invalid URL format').optional().or(z.literal('')),
 		imageChecked: z.boolean(),
 		imageHeight: z.preprocess(
-			val => (val === '' ? undefined : Number(val)), // Преобразуем в число или undefined
+			val => (val === '' ? undefined : Number(val)),
 			z.number().optional()
 		),
 		imageWidth: z.preprocess(
-			val => (val === '' ? undefined : Number(val)), // Преобразуем в число или undefined
+			val => (val === '' ? undefined : Number(val)),
 			z.number().optional()
 		),
-		pageUrl: z.string().url('Invalid URL format'),
 	})
 	.refine(
 		data => {
