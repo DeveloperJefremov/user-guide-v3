@@ -1,19 +1,19 @@
 'use client';
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 
-import { Step } from '@prisma/client'
+import { Step } from '@prisma/client';
 
-import { Reorder } from 'framer-motion'
-import React, { useState } from 'react'
+import { Reorder } from 'framer-motion';
+import React, { useState } from 'react';
 import {
 	deleteStep,
 	// getStepsBySetId,
 	updateStepsOrder,
-} from '../../../data/step'
-import { StepHighlighter } from '../StepHighlighter'
-import { GuideStep } from './GuideStep'
-import { StepModal } from './StepModal'
+} from '../../../data/step';
+import { StepHighlighter } from '../StepHighlighter';
+import { GuideStep } from './GuideStep';
+import { StepModal } from './StepModal';
 
 interface GuideStepsListProps {
 	steps: Step[];

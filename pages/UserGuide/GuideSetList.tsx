@@ -18,7 +18,6 @@ export const GuideSetList = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedSet, setSelectedSet] = useState<SetWithSteps | null>(null);
 	const [filterStatus, setFilterStatus] = useState<Status | 'ALL'>('ALL'); // Начальный статус - "ALL"
-	const [isToggleOn, setIsToggleOn] = useState<boolean>(false);
 
 	async function fetchSets() {
 		try {
