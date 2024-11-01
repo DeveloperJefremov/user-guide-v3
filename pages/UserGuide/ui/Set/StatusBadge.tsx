@@ -56,8 +56,10 @@ StatusBadgeProps) => {
 					variant='outline'
 					size='sm'
 					className={cn(
-						'ml-2',
-						isToggleOn ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+						'ml-2 cursor-default', // Добавлен класс cursor-default
+						isToggleOn
+							? 'bg-green-500 hover:bg-green-500 text-white'
+							: 'bg-gray-200 text-gray-700'
 					)}
 					// onClick={onToggle}
 				>
