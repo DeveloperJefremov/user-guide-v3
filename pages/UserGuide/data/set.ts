@@ -76,6 +76,7 @@ export async function updateSet(
 			data: {
 				title: parsedData.data.title,
 				status: parsedData.data.status,
+				pageUrl: parsedData.data.pageUrl,
 			},
 			include: {
 				steps: {

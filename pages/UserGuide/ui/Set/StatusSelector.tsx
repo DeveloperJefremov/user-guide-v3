@@ -15,11 +15,19 @@ import React, { useState } from 'react';
 interface StatusSelectorProps {
 	currentStatus: Status;
 	onChangeStatus: (newStatus: Status) => void;
+	// isToggleOn: boolean;
+	// setIsToggleOn: (isToggleOn: boolean) => void;
+	// onToggleStatusChange?: (isToggleOn: boolean) => void;
+	isEditing?: boolean;
 }
 
 export const StatusSelector = ({
 	currentStatus,
 	onChangeStatus,
+	// isToggleOn,
+	// setIsToggleOn,
+	// onToggleStatusChange,
+	isEditing = true,
 }: StatusSelectorProps): JSX.Element => {
 	const [status, setStatus] = useState<Status>(currentStatus);
 	const [isToggleOn, setIsToggleOn] = useState<boolean>(false);
@@ -41,7 +49,11 @@ export const StatusSelector = ({
 
 	return (
 		<div className='flex items-center ml-4'>
-			<Select value={status} onValueChange={handleStatusChange}>
+			<Select
+				value={status}
+				onValueChange={handleStatusChange}
+				disabled={!isEditing}
+			>
 				<SelectTrigger className='w-40'>
 					<SelectValue placeholder='Select status' />
 				</SelectTrigger>

@@ -15,13 +15,14 @@ datasource db {
 }
 
 model Set {
-  id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(255)
-  pageUrl   String
-  status    Status   @default(EMPTY)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  order     Int      @default(0)
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  pageUrl     String
+  status      Status   @default(EMPTY)
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  order       Int      @default(0)
 
   // userId Int
   // user   User @relation(fields: [userId], references: [id])

@@ -50,6 +50,7 @@ export const GuideSet = ({
 		<div>
 			<div className='border p-8 m-24'>
 				<SetHeader
+					pageUrl={set.pageUrl}
 					setTitle={set.title}
 					setId={set.id}
 					status={set.status}

@@ -14,7 +14,7 @@ import { SetWithSteps } from '@/lib/types/types';
 import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Set as SetModel, Status } from '@prisma/client';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { createSet, updateSet } from '../../data/set';
 import { Modal } from '../../shared/Modal';
@@ -36,6 +36,7 @@ export function SetModal({
 	initialData,
 }: SetModalProps) {
 	const isEditing = Boolean(initialData);
+	const [isToggleOn, setIsToggleOn] = useState<boolean>(false);
 	const localStorageKey = isEditing ? `editSet_${initialData?.id}` : 'newSet';
 
 	// Инициализация всех данных формы в localStorage
@@ -44,8 +45,8 @@ export function SetModal({
 		isEditing && initialData
 			? {
 					title: initialData.title,
-					status: initialData.status,
 					pageUrl: initialData.pageUrl,
+					status: initialData.status || Status.DRAFT,
 			  }
 			: {
 					title: '',
@@ -194,6 +195,8 @@ export function SetModal({
 									<StatusSelector
 										currentStatus={field.value as Status}
 										onChangeStatus={field.onChange}
+										isEditing={isEditing}
+										// onToggleStatusChange={isOn => setIsToggleOn(isOn)}
 									/>
 									{errors.status && (
 										<FormMessage className='text-red-500 text-sm mt-2'>
