@@ -50,13 +50,14 @@ export const GuideSet = ({
 		<div>
 			<div className='border p-8 m-24'>
 				<SetHeader
+					isCompleted={set.isCompleted}
 					pageUrl={set.pageUrl}
 					setTitle={set.title}
 					setId={set.id}
 					status={set.status}
 					onDelete={handleDelete}
 					onEdit={handleEdit}
-					onChangeStatus={handleStatusChange}
+					// onChangeStatus={handleStatusChange}
 					isExpanded={isExpanded}
 					onToggleExpand={toggleExpand}
 				/>

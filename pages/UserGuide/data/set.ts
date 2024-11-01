@@ -36,6 +36,7 @@ export async function createSet(data: SetWithSteps): Promise<SetWithSteps> {
 			pageUrl: parsedData.data.pageUrl,
 			// userId: 1,
 			status: parsedData.data.status,
+			isCompleted: parsedData.data.isCompleted || false,
 		},
 		include: {
 			steps: {
@@ -77,6 +78,7 @@ export async function updateSet(
 				title: parsedData.data.title,
 				status: parsedData.data.status,
 				pageUrl: parsedData.data.pageUrl,
+				isCompleted: parsedData.data.isCompleted || false,
 			},
 			include: {
 				steps: {
@@ -96,7 +98,10 @@ export async function updateSetStatus(setId: number, newStatus: Status) {
 	try {
 		const updatedSet = await prisma.set.update({
 			where: { id: setId },
-			data: { status: newStatus },
+			data: {
+				status: newStatus,
+				isCompleted: newStatus === Status.COMPLETED ? true : false,
+			},
 		});
 		return updatedSet;
 	} catch (error) {

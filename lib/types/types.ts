@@ -34,6 +34,7 @@ export interface Set {
 	title: string;
 	pageUrl: string;
 	status: Status;
+	isCompleted: boolean;
 	order: number;
 	createdAt: Date;
 	updatedAt: Date;

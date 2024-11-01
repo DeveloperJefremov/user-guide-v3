@@ -1,5 +1,4 @@
 'use client';
-
 import { Button } from '@/components/ui/button';
 import {
 	Select,
@@ -9,14 +8,16 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Status } from '@prisma/client';
+import { Set, Status } from '@prisma/client';
 import React, { useState } from 'react';
+import { updateSet } from '../../data/set';
 
 interface StatusSelectorProps {
 	currentStatus: Status;
 	onChangeStatus: (newStatus: Status) => void;
-	// isToggleOn: boolean;
-	// setIsToggleOn: (isToggleOn: boolean) => void;
+	isToggleOn: boolean;
+	setIsToggleOn: (isToggleOn: boolean) => void;
+	initialData?: Set | null;
 	// onToggleStatusChange?: (isToggleOn: boolean) => void;
 	isEditing?: boolean;
 }
@@ -24,13 +25,14 @@ interface StatusSelectorProps {
 export const StatusSelector = ({
 	currentStatus,
 	onChangeStatus,
-	// isToggleOn,
-	// setIsToggleOn,
+	isToggleOn,
+	setIsToggleOn,
+	// initialData,
 	// onToggleStatusChange,
 	isEditing = true,
 }: StatusSelectorProps): JSX.Element => {
 	const [status, setStatus] = useState<Status>(currentStatus);
-	const [isToggleOn, setIsToggleOn] = useState<boolean>(false);
+	// const [isToggleOn, setIsToggleOn] = useState<boolean>(false);
 
 	const statuses: Status[] = ['EMPTY', 'DRAFT', 'UNDER_REVIEW', 'COMPLETED'];
 
@@ -44,8 +46,27 @@ export const StatusSelector = ({
 	};
 
 	const handleToggleClick = () => {
-		setIsToggleOn(prev => !prev);
+		setIsToggleOn(!isToggleOn);
 	};
+
+	// const handleToggleClick = async () => {
+	// 	setIsToggleOn(!isToggleOn);
+	// 	// Если есть `initialData`, обновляем его в базе данных
+	// 	if (isEditing && initialData) {
+	// 		try {
+	// 			await updateSet(initialData.id, {
+	// 				...initialData,
+	// 				isCompleted: !isToggleOn,
+	// 				steps: [],
+	// 			});
+	// 		} catch (error) {
+	// 			console.error(
+	// 				'Ошибка при обновлении isCompleted в базе данных:',
+	// 				error
+	// 			);
+	// 		}
+	// 	}
+	// };
 
 	return (
 		<div className='flex items-center ml-4'>
@@ -68,6 +89,7 @@ export const StatusSelector = ({
 
 			{status === 'COMPLETED' && (
 				<Button
+					type='button'
 					variant='outline'
 					size='sm'
 					className={cn(

@@ -1,10 +1,14 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Status } from '@prisma/client';
 import { CheckCircle, Edit3, FileText, Hourglass } from 'lucide-react';
 import React from 'react';
 
 interface StatusBadgeProps {
 	status: Status;
+	isToggleOn: boolean;
+	// onToggle: () => void;
 }
 
 const statusConfig = {
@@ -30,15 +34,36 @@ const statusConfig = {
 	},
 };
 
-export const StatusBadge = ({ status }: StatusBadgeProps) => {
+export const StatusBadge = ({
+	status,
+	isToggleOn,
+}: // onToggle,
+StatusBadgeProps) => {
 	const { label, styles, icon } = statusConfig[status];
 
 	return (
-		<Badge
-			className={`${styles} flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm transition-all duration-200 transform hover:scale-105`}
-		>
-			{icon}
-			<span>{label}</span>
-		</Badge>
+		<div className='flex items-center space-x-2'>
+			<Badge
+				className={`${styles} flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm transition-all duration-200 transform hover:scale-105`}
+			>
+				{icon}
+				<span>{label}</span>
+			</Badge>
+			{/* Индикатор On/Off для статуса COMPLETED */}
+			{status === 'COMPLETED' && (
+				<Button
+					type='button'
+					variant='outline'
+					size='sm'
+					className={cn(
+						'ml-2',
+						isToggleOn ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+					)}
+					// onClick={onToggle}
+				>
+					{isToggleOn ? 'On' : 'Off'}
+				</Button>
+			)}
+		</div>
 	);
 };

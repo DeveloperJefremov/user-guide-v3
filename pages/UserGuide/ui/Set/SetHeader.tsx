@@ -13,23 +13,22 @@ interface SetHeaderProps {
 	pageUrl: string; // Добавляем pageUrl
 	onDelete: (id: number) => void;
 	onEdit: (set: Set) => void;
-	onChangeStatus?: (id: number, newStatus: Status) => void;
+	isCompleted?: boolean;
 	isExpanded: boolean;
 	onToggleExpand: () => void;
-	isToggleOn?: boolean;
 }
 
 export const SetHeader = ({
 	setTitle,
 	setId,
 	status,
+	isCompleted,
 	pageUrl, // Принимаем pageUrl
 	onDelete,
 	onEdit,
-	onChangeStatus,
+
 	isExpanded,
 	onToggleExpand,
-	isToggleOn = false,
 }: SetHeaderProps) => {
 	const handleEdit = () => {
 		onEdit({
@@ -40,36 +39,28 @@ export const SetHeader = ({
 			order: 0,
 			createdAt: new Date(),
 			updatedAt: new Date(),
-			userId: 1, // Замените на актуальный userId
+			userId: 1,
+			isCompleted: false,
 		});
 	};
 
-	const handleStatusChange = async (newStatus: Status) => {
-		try {
-			await updateSetStatus(setId, newStatus);
-			if (onChangeStatus) {
-				onChangeStatus(setId, newStatus);
-			}
-		} catch (error) {
-			console.error('Ошибка при изменении статуса:', error);
-		}
-	};
+	// const handleStatusChange = async (newStatus: Status) => {
+	// 	try {
+	// 		await updateSetStatus(setId, newStatus);
+	// 		if (onChangeStatus) {
+	// 			onChangeStatus(setId, newStatus);
+	// 		}
+	// 	} catch (error) {
+	// 		console.error('Ошибка при изменении статуса:', error);
+	// 	}
+	// };
 
 	return (
 		<header className='p-4 flex justify-between items-center'>
 			<div className='flex flex-col'>
 				<div className='flex items-center'>
 					<h2 className='text-xl font-bold mr-3'>{setTitle}</h2>
-					<StatusBadge status={status} />
-					{status === 'COMPLETED' && (
-						<span
-							className={`ml-2 font-medium ${
-								isToggleOn ? 'text-green-500' : 'text-gray-500'
-							}`}
-						>
-							{isToggleOn ? 'On' : 'Off'}
-						</span>
-					)}
+					<StatusBadge status={status} isToggleOn={isCompleted ?? false} />
 				</div>
 				<p className='text-sm text-gray-500 mt-2'>{pageUrl}</p>
 			</div>

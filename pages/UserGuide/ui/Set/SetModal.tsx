@@ -36,7 +36,9 @@ export function SetModal({
 	initialData,
 }: SetModalProps) {
 	const isEditing = Boolean(initialData);
-	const [isToggleOn, setIsToggleOn] = useState<boolean>(false);
+	const [isToggleOn, setIsToggleOn] = useState<boolean>(
+		initialData?.isCompleted || false
+	);
 	const localStorageKey = isEditing ? `editSet_${initialData?.id}` : 'newSet';
 
 	// Инициализация всех данных формы в localStorage
@@ -91,6 +93,7 @@ export function SetModal({
 					status: data.status || Status.DRAFT,
 					pageUrl: data.pageUrl || '',
 				};
+				setIsToggleOn(initialData?.isCompleted || false);
 				setSetData(validatedData); // Сохраняем все поля в localStorage
 			});
 			return () => subscription.unsubscribe();
@@ -107,6 +110,7 @@ export function SetModal({
 				updatedAt: new Date(),
 				userId: 0,
 				steps: [],
+				isCompleted: isToggleOn,
 			};
 
 			if (isEditing && initialData) {
@@ -193,9 +197,13 @@ export function SetModal({
 								<FormItem>
 									<FormLabel>Status</FormLabel>
 									<StatusSelector
+										// initialData={initialData}
 										currentStatus={field.value as Status}
 										onChangeStatus={field.onChange}
 										isEditing={isEditing}
+										isToggleOn={isToggleOn}
+										setIsToggleOn={setIsToggleOn}
+
 										// onToggleStatusChange={isOn => setIsToggleOn(isOn)}
 									/>
 									{errors.status && (
