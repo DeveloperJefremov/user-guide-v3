@@ -80,6 +80,7 @@ export const GuideStepsList = ({
 				.filter(step => step.id !== stepId)
 				.map((step, index) => ({ ...step, order: index + 1 }));
 			setLocalSteps(updatedSteps);
+			setCurrentStepIndex(0);
 
 			await updateStepsOrder(
 				updatedSteps.map(step => ({ id: step.id, order: step.order }))

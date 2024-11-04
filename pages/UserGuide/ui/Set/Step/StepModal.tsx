@@ -23,8 +23,8 @@ import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { LockIcon, TrashIcon, UnlockIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { v4 as uuidv4 } from 'uuid';
 import { Upload } from './Upload';
-
 interface StepModalProps {
 	setId: number;
 	stepId?: number;
@@ -162,19 +162,20 @@ export const StepModal = ({
 		}
 	}, [methods, setStepData, isOpen, setId]);
 
+	const generateUniqueFileName = (originalName: string, stepId?: number) => {
+		return stepId ? `${stepId}_${originalName}` : `${uuidv4()}_${originalName}`;
+	};
 	const handleImageUpload = async (): Promise<string | null> => {
 		if (!selectedFile) return null;
 
 		return new Promise((resolve, reject) => {
-			console.log('Начинается загрузка файла:', selectedFile.name);
-
-			const storageRef = ref(storage, `images/${selectedFile.name}`);
+			const uniqueFileName = generateUniqueFileName(selectedFile.name, stepId);
+			const storageRef = ref(storage, `images/${uniqueFileName}`);
 			const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
 			uploadTask.on(
 				'state_changed',
 				snapshot => {
-					// Отображаем прогресс загрузки
 					const progress =
 						(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
 					console.log(`Загрузка: ${progress}%`);
@@ -184,7 +185,6 @@ export const StepModal = ({
 					reject(null);
 				},
 				() => {
-					// Получаем ссылку на загруженный файл
 					getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
 						console.log('Файл успешно загружен. URL:', downloadURL);
 						resolve(downloadURL);
@@ -223,22 +223,22 @@ export const StepModal = ({
 		setLoading(true);
 
 		try {
-			let imageUrl = null;
+			let imageUrl = stepData.imageUrl;
 
 			if (selectedFile) {
-				imageUrl = await handleImageUpload(); // Загружаем изображение, если оно выбрано
+				imageUrl = (await handleImageUpload()) ?? undefined; // Загружаем изображение с уникальным именем
 			}
 
-			const stepData = {
+			const stepDataToSave = {
 				...data,
 				imageUrl: imageUrl || data.imageUrl,
 			};
 
 			if (isEditing && initialData) {
-				const updatedStep = await updateStep(initialData.id, stepData);
+				const updatedStep = await updateStep(initialData.id, stepDataToSave);
 				onStepUpdated(updatedStep);
 			} else {
-				const newStep = await createStep({ ...stepData, setId });
+				const newStep = await createStep({ ...stepDataToSave, setId });
 				onStepCreated(newStep);
 			}
 
