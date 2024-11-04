@@ -244,6 +244,7 @@ export const StepModal = ({
 
 			reset();
 			removeStepData();
+			localStorage.removeItem(`previewUrl_${setId}_new`);
 			onClose();
 		} catch (error) {
 			console.error('Ошибка при создании/обновлении шага:', error);
@@ -255,6 +256,7 @@ export const StepModal = ({
 	const handleCancel = () => {
 		reset();
 		removeStepData();
+		localStorage.removeItem(`previewUrl_${setId}_new`);
 		onClose();
 	};
 
