@@ -1,16 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-
 import { Step } from '@prisma/client';
-
 import { Reorder } from 'framer-motion';
 import React, { useState } from 'react';
-import {
-	deleteStep,
-	// getStepsBySetId,
-	updateStepsOrder,
-} from '../../../data/step';
+import { deleteStep, updateStepsOrder } from '../../../data/step';
 import { StepHighlighter } from '../StepHighlighter';
 import { GuideStep } from './GuideStep';
 import { StepModal } from './StepModal';
@@ -112,7 +106,7 @@ export const GuideStepsList = ({
 	};
 
 	const goToNextStep = () => {
-		if (currentStepIndex < steps.length - 1) {
+		if (currentStepIndex < localSteps.length - 1) {
 			setCurrentStepIndex(prev => prev + 1);
 		}
 	};
@@ -183,7 +177,7 @@ export const GuideStepsList = ({
 
 			{isLaunching && (
 				<StepHighlighter
-					steps={steps}
+					steps={localSteps} // передаем актуализированный список шагов
 					setIsLaunching={setIsLaunching}
 					currentStepIndex={currentStepIndex}
 					goToNextStep={goToNextStep}

@@ -30,7 +30,7 @@ export const StepHighlighter = ({
 	);
 
 	useEffect(() => {
-		if (steps.length === 0) return;
+		if (steps.length === 0 || !steps[currentStepIndex]) return;
 
 		const step = steps[currentStepIndex];
 		const element = document.getElementById(step.elementId);
@@ -75,6 +75,8 @@ export const StepHighlighter = ({
 			element.classList.remove('ring-2', 'ring-red-500', 'bg-red-100'); // Убираем подсветку
 		}
 	};
+
+	if (!steps[currentStepIndex]) return null;
 
 	return (
 		tooltipElement &&
