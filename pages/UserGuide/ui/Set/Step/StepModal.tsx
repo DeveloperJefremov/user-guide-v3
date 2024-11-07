@@ -13,9 +13,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
 import { storage } from '@/lib/store/firebase';
-import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
 import { createStep, updateStep } from '@/pages/UserGuide/data/step';
 import { Modal } from '@/pages/UserGuide/shared/Modal';
+import {
+	CreateStepInput,
+	createStepSchema,
+} from '@/pages/UserGuide/zod/stepSchema';
 import { DevTool } from '@hookform/devtools';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Step } from '@prisma/client';

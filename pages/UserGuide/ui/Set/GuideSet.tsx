@@ -1,7 +1,7 @@
 import { Status } from '@prisma/client';
 import { useState } from 'react';
 
-import { SetWithSteps } from '@/lib/types/types';
+import { SetWithSteps } from '@/pages/UserGuide/types/types';
 import { SetFooter } from './SetFooter';
 import { SetHeader } from './SetHeader';
 import { GuideStepsList } from './Step/GuideStepList';

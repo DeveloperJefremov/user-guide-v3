@@ -1,4 +1,4 @@
-import { CreateStepInput } from '@/lib/zod/stepSchema';
+import { CreateStepInput } from '@/pages/UserGuide/zod/stepSchema';
 
 import React, { useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';

@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { storage } from '@/lib/store/firebase';
-import { SetWithSteps } from '@/lib/types/types';
+import { SetWithSteps } from '@/pages/UserGuide/types/types';
 import { Status } from '@prisma/client';
 import { deleteObject, ref } from 'firebase/storage';
 import { Reorder } from 'framer-motion';

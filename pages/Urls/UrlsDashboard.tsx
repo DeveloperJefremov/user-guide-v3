@@ -2,36 +2,46 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import React, { useEffect, useState } from 'react';
+import { createUrl, deleteUrl, editUrl, fetchUrls } from './data/url';
+import { Url } from './types/types';
+import UrlCreateForm from './ui/UrlCreateForm';
+import UrlItem from './ui/UrlItem';
 
 const UrlsDashboard = () => {
 	const [isShownForm, setIsShownForm] = useState(false);
+	const [urls, setUrls] = useState<Url[]>([]);
 
-	// useEffect для возможного начального получения данных
 	// useEffect(() => {
 	// 	let isMounted = true;
 	// 	if (!tags) {
-	// 		fetchTags(() => isMounted);
+	// 		fetchUrls(() => isMounted);
 	// 	}
 	// 	return () => {
 	// 		isMounted = false;
 	// 	};
 	// }, []);
 
-	// Функция для создания нового тега (пример обработки)
-	// const createNewTagHandler = (newTag: Url) => {
-	// 	setIsShownForm(false);
-	// 	createUrl(newTag);
-	// };
+	useEffect(() => {
+		const loadUrls = async () => {
+			const fetchedUrls = await fetchUrls();
+			setUrls(fetchedUrls);
+		};
 
-	// Функция для удаления тега
-	// const deleteTagHandler = (id: number) => {
-	// 	deleteUrl(id);
-	// };
+		loadUrls();
+	}, []);
 
-	// Функция для обновления тега
-	// const updateTagHandler = (updatedTag: Url) => {
-	// 	editUrl(updatedTag);
-	// };
+	const createUrlTagHandler = (newTag: Url) => {
+		setIsShownForm(false);
+		createUrl(newTag);
+	};
+
+	const deleteUrlHandler = (id: number) => {
+		deleteUrl(id);
+	};
+
+	const updateUrlHandler = (updatedTag: Url) => {
+		editUrl(updatedTag);
+	};
 
 	return (
 		<div className='flex h-screen'>
@@ -41,7 +51,7 @@ const UrlsDashboard = () => {
 					{/* Карточка для создания нового тега */}
 					<Card className='p-3'>
 						<CardHeader>
-							<CardTitle>Create New Tag</CardTitle>
+							<CardTitle>Create New Url</CardTitle>
 						</CardHeader>
 						<CardContent className='flex justify-start gap-4 pt-3'>
 							{!isShownForm ? (
@@ -52,11 +62,13 @@ const UrlsDashboard = () => {
 									Create New
 								</Button>
 							) : (
-								<span>Форма создания тега</span>
-								// <TagCreateForm
-								// 	onTagCreated={createNewTagHandler}
-								// 	onCancel={() => setIsShownForm(false)}
-								// />
+								<>
+									<span>Url adding form</span>
+									<UrlCreateForm
+										onUrlCreated={createUrlTagHandler}
+										onCancel={() => setIsShownForm(false)}
+									/>
+								</>
 							)}
 						</CardContent>
 					</Card>
@@ -67,25 +79,25 @@ const UrlsDashboard = () => {
 					{/* Карточка для отображения существующих тегов */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Tags</CardTitle>
+							<CardTitle>Urls</CardTitle>
 						</CardHeader>
+						tags
 						<CardContent className='flex flex-col items-start gap-6'>
-							{/* Проверка на наличие тегов и отображение списка */}
-							{/* {isLoading && <span>Loading...</span>}
-							{tags !== null && !!tags.length && !isLoading ? (
+							{urls !== null && !!urls.length ? (
 								<ul className='flex flex-col gap-4'>
-									{tags.map((tag: Tag, index: number) => (
-										// <TagItem
-										// 	key={tag.id + tag.title}
-										// 	tag={tag}
-										// 	onTagChange={updateTagHandler}
-										// 	onTagDelete={deleteTagHandler}
-										// />
+									{urls.map((url: Url, index: number) => (
+										<UrlItem
+											key={url.id + url.url}
+											url={url}
+											// type={'projectTag'}
+											onUrlChange={updateUrlHandler}
+											onUrlDelete={deleteUrlHandler}
+										/>
 									))}
-								</ul> */}
-							{/* ) : ( */}
-							<span>No Url's</span>
-							{/* )} */}
+								</ul>
+							) : (
+								<span>No Urls</span>
+							)}
 						</CardContent>
 					</Card>
 				</div>
@@ -94,7 +106,7 @@ const UrlsDashboard = () => {
 			{/* Правая половина экрана с iframe по центру */}
 			<div className='w-1/2 flex items-center justify-center'>
 				<iframe
-					src='https://nextjs.org/' // Замените на нужный URL
+					src='http://localhost:3000/tutorials' // Замените на нужный URL
 					className='w-3/4 h-3/4'
 					title='External Content'
 				></iframe>

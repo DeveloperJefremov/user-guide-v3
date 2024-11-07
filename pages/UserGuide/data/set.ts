@@ -1,6 +1,6 @@
 'use server';
-import { SetWithSteps } from '@/lib/types/types';
-import { createSetSchema } from '@/lib/zod/setSchema';
+import { SetWithSteps } from '@/pages/UserGuide/types/types';
+import { createSetSchema } from '@/pages/UserGuide/zod/setSchema';
 import { prisma } from '@/prisma/prisma-client';
 import { Status } from '@prisma/client';
 

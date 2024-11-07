@@ -1,5 +1,8 @@
 'use server';
-import { CreateStepInput, createStepSchema } from '@/lib/zod/stepSchema';
+import {
+	CreateStepInput,
+	createStepSchema,
+} from '@/pages/UserGuide/zod/stepSchema';
 import { prisma } from '@/prisma/prisma-client';
 
 // export async function getStepsBySetId(setId: number) {

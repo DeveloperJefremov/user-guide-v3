@@ -10,8 +10,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
-import { SetWithSteps } from '@/lib/types/types';
-import { CreateSetInput, createSetSchema } from '@/lib/zod/setSchema';
+import { SetWithSteps } from '@/pages/UserGuide/types/types';
+import {
+	CreateSetInput,
+	createSetSchema,
+} from '@/pages/UserGuide/zod/setSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Set as SetModel, Status } from '@prisma/client';
 import React, { useEffect, useRef, useState } from 'react';

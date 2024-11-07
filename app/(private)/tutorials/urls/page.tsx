@@ -1,4 +1,4 @@
-import UrlsDashboard from '@/pages/Urls/ui/UrlsDashboard';
+import UrlsDashboard from '@/pages/Urls/UrlsDashboard';
 const Urls = () => {
 	return (
 		<>

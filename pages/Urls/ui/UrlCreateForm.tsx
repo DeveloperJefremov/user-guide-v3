@@ -1,44 +1,94 @@
-import { Button } from '@/components/ui/button'
-import { FormControl, FormField, FormItem, FormLabel, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { RadioGroupItem } from '@/components/ui/radio-group'
-import { Select } from '@/components/ui/select'
-import React from 'react'
-import { Form } from 'react-hook-form'
+import { FormError } from '@/components/shared/form-error';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState } from 'react';
+import { Form, FormProvider, useForm } from 'react-hook-form';
+import { Url, UrlForm } from '../types/types';
+import { urlFormSchema } from '../zod/urlSchema';
 
-const UrlCreateForm = () => {
+interface Props {
+	onUrlCreated: (url: Url) => void;
+	onCancel: () => void;
+	url?: Url;
+}
 
-	const TagCreateForm = ({ onTagCreated, onCancel, tag }: Props) => {
-		const initialFormValues: TagForm = {
-			title: '',
-			description: [{ id: Math.random(), value: '', order: 0 }],
-			placeholder: null,
-			status: 'ACTIVE',
-			validFrom: new Date(),
-			validTo: new Date('4000-01-01'),
-			honeyPot: '',
+const UrlCreateForm = ({ onUrlCreated, onCancel, url }: Props) => {
+	const initialFormValues: UrlForm = {
+		url: '',
+		description: [{ id: Math.random(), value: '', order: 0 }],
+		status: 'ACTIVE',
+		validFrom: new Date(),
+		validTo: new Date('4000-01-01'),
+		honeyPot: '',
+	};
+	const initialConfirmedDate =
+		url && url.validTo.toISOString().slice(0, 10) !== '4000-01-01'
+			? true
+			: false;
+	const initialValidityPeriod = initialConfirmedDate ? 'from-to' : 'unlimited';
+	const [validityPeriod, setValidityPeriod] = useState<'unlimited' | 'from-to'>(
+		initialValidityPeriod
+	);
+	const [isConfirmedDate, setIsConfirmedDate] = useState(initialConfirmedDate);
+
+	const form = useForm<UrlForm>({
+		resolver: zodResolver(urlFormSchema),
+		defaultValues: url ? { ...url, honeyPot: '' } : initialFormValues,
+	});
+
+	const submitHandler = (newUrl: UrlForm): void => {
+		// if (!user || !user.id) return;
+
+		const { id, honeyPot, ...restUrl } = newUrl;
+		const temporaryId = Math.random();
+		const url: Url = {
+			...restUrl,
+			id: id || temporaryId,
+			// userId: user.id,
 		};
 
-		const submitHandler = (newTag: TagForm): void => {
-			if (!user || !user.id) return;
+		onUrlCreated(url);
+		form.reset(initialFormValues);
+	};
 
-	
-			const { id, honeyPot, userId, ...restTag } = newTag;
-			const temporaryId = Math.random();
-			const tag: Url = {
-				...restTag,
-				id: id || temporaryId,
-				userId: user.id,
-			};
-	
-			onTagCreated(tag);
-			form.reset(initialFormValues);
-		};
+	const onKeyDownHandler = (e: React.KeyboardEvent): void => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+		}
+	};
+
+	const formattedStartDate = form.watch('validFrom')
+		? form.watch('validFrom').toLocaleDateString()
+		: '';
+	const formattedEndDate = form.watch('validTo')
+		? form.watch('validTo').toLocaleDateString()
+		: '';
 
 	return (
-		<Form {...form}>
+		<FormProvider {...form}>
 			<form
 				onSubmit={form.handleSubmit(submitHandler)}
 				onKeyDown={onKeyDownHandler}
@@ -46,10 +96,10 @@ const UrlCreateForm = () => {
 			>
 				<FormField
 					control={form.control}
-					name='title'
+					name='url'
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className='pl-[2px] '>Title</FormLabel>
+							<FormLabel className='pl-[2px] '>Url</FormLabel>
 							<FormControl>
 								<Input className='  text-base mt-[5px] ' {...field} />
 							</FormControl>
@@ -59,29 +109,12 @@ const UrlCreateForm = () => {
 
 				<div className='flex flex-col gap-3'>
 					<Label>Description</Label>
-					<ListTextarea
+					{/* <ListTextarea
 						value={form.watch('description') ?? []}
 						onChange={newValue => {
 							form.setValue('description', newValue);
 						}}
-					/>
-				</div>
-
-				<div className='flex flex-col gap-3'>
-					<Label>Placeholders</Label>
-					<PlaceholderButton onClick={placeholderAddHandler} />
-					{form
-						.watch('placeholder')
-						?.map((placeholder: TagPlaceholder, index) => (
-							<TagPlaceholderForm
-								key={placeholder.placeholder}
-								placeholder={placeholder}
-								onDelete={() => placeholderDeleteHandler(index)}
-								onEdit={newPlaceholder =>
-									placeholderEditHandler(newPlaceholder, index)
-								}
-							/>
-						))}
+					/> */}
 				</div>
 
 				<div className='flex flex-col gap-1'>
@@ -136,7 +169,7 @@ const UrlCreateForm = () => {
 								)}
 							</PopoverTrigger>
 							<PopoverContent className='w-auto'>
-								<RangeCalendar
+								{/* <RangeCalendar
 									onGetDate={(date: { timeStart: Date; timeEnd: Date }) => {
 										form.setValue('validFrom', date.timeStart);
 										form.setValue('validTo', date.timeEnd);
@@ -149,7 +182,7 @@ const UrlCreateForm = () => {
 									isConfirmed={isConfirmedDate}
 									onConfirm={() => setIsConfirmedDate(true)}
 									displayTimeRange={false}
-								/>
+								/> */}
 							</PopoverContent>
 						</Popover>
 					</>
@@ -186,7 +219,7 @@ const UrlCreateForm = () => {
 
 				<div className='flex gap-3 w-full'>
 					<Button variant='outline' type='submit' className='w-full'>
-						{tag ? 'Save' : 'Create'}
+						{url ? 'Save' : 'Create'}
 					</Button>
 
 					<Button
@@ -198,7 +231,7 @@ const UrlCreateForm = () => {
 						Cancel
 					</Button>
 				</div>
-				{Object.keys(form.formState.errors).map(
+				{/* {Object.keys(form.formState.errors).map(
 					field =>
 						form.formState.errors[field] && (
 							<FormError
@@ -206,9 +239,9 @@ const UrlCreateForm = () => {
 								message={`${field} - ${form.formState.errors[field].message}`}
 							/>
 						)
-				)}
+				)} */}
 			</form>
-		</Form>
+		</FormProvider>
 	);
 };
 
