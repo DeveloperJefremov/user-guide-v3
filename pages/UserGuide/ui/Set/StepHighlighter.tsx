@@ -9,6 +9,7 @@ import 'tippy.js/dist/tippy.css';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StepCard } from './Step/StepCard';
 
 interface StepHighlighterProps {
 	steps: Step[];
@@ -36,7 +37,7 @@ export const StepHighlighter = ({
 		const element = document.getElementById(step.elementId);
 
 		if (element) {
-			const tooltipDiv = document.createElement('div'); // Создаем элемент для тултипа
+			const tooltipDiv = document.createElement('div');
 			setTooltipElement(tooltipDiv);
 
 			const instance = tippy(element, {
@@ -44,17 +45,14 @@ export const StepHighlighter = ({
 				trigger: 'manual',
 				placement: 'right',
 				interactive: true,
-				hideOnClick: false, // Теперь тултип закрывается только вручную
+				hideOnClick: false,
 				arrow: false,
 			});
 
 			instance.show();
-
-			// Добавляем классы для подсветки элемента
 			element.classList.add('ring-2', 'ring-red-500', 'bg-red-100');
 		}
 
-		// Очистка при смене шага или размонтировании компонента
 		return () => {
 			hideAll();
 			steps.forEach(step => {
@@ -66,13 +64,12 @@ export const StepHighlighter = ({
 		};
 	}, [currentStepIndex, steps]);
 
-	// Функция для закрытия тултипа и удаления подсветки
 	const closeTooltip = () => {
 		setIsLaunching(false);
 		hideAll();
 		const element = document.getElementById(steps[currentStepIndex].elementId);
 		if (element) {
-			element.classList.remove('ring-2', 'ring-red-500', 'bg-red-100'); // Убираем подсветку
+			element.classList.remove('ring-2', 'ring-red-500', 'bg-red-100');
 		}
 	};
 
@@ -90,40 +87,22 @@ export const StepHighlighter = ({
 						variant='ghost'
 						size='icon'
 						className='absolute top-2 right-2'
-						onClick={closeTooltip} // Закрываем тултип и убираем подсветку
+						onClick={closeTooltip}
 					>
 						<X className='w-5 h-5 text-gray-500 hover:text-gray-700' />
 					</Button>
 				</CardHeader>
+				<StepCard
+					description={steps[currentStepIndex].description ?? undefined}
+					elementId={steps[currentStepIndex].elementId}
+					imageUrl={steps[currentStepIndex].imageUrl ?? undefined}
+					imageWidth={steps[currentStepIndex].imageWidth ?? undefined}
+					imageHeight={steps[currentStepIndex].imageHeight ?? undefined}
+				/>
 				<CardContent>
-					<p className='text-sm'>
-						{steps[currentStepIndex].description || 'No description'}
-					</p>
-					<p className='text-sm'>
-						Element ID: {steps[currentStepIndex].elementId}
-					</p>
-					{/* <p className='text-sm'>Page URL: {steps[currentStepIndex].pageUrl}</p> */}
-
-					{/* Отображение изображения, если оно есть */}
-					{steps[currentStepIndex].imageUrl && (
-						<img
-							src={steps[currentStepIndex].imageUrl}
-							alt='Step Image'
-							className='mt-4 rounded-lg'
-							style={{
-								width: `${steps[currentStepIndex].imageWidth || 'auto'}px`, // Устанавливаем ширину
-								height: `${steps[currentStepIndex].imageHeight || 'auto'}px`, // Устанавливаем высоту
-								maxWidth: '100%', // Гарантируем, что изображение не выйдет за пределы контейнера
-								maxHeight: '100%', // Ограничиваем высоту для мобильных устройств
-							}}
-						/>
-					)}
-
-					{/* Динамический счётчик шагов */}
 					<p className='text-sm font-medium mt-4'>
 						Total steps: {currentStepIndex + 1} of {steps.length}
 					</p>
-
 					<div className='mt-4 flex justify-between'>
 						<Button variant='secondary' onClick={goToPrevStep}>
 							Back

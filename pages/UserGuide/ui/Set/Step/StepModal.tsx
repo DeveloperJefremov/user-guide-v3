@@ -223,6 +223,16 @@ export const StepModal = ({
 		setLoading(true);
 
 		try {
+			// Проверка на существование элемента с указанным Element ID
+			const element = document.getElementById(data.elementId);
+			if (!element) {
+				alert(
+					'Element with this ID does not exist. Please enter a valid Element ID.'
+				);
+				setLoading(false);
+				return;
+			}
+
 			let imageUrl = stepData.imageUrl;
 
 			if (selectedFile) {
@@ -434,30 +444,6 @@ export const StepModal = ({
 							)}
 						/>
 					</div>
-
-					{/* <div className='mb-4'>
-						<FormField
-							name='pageUrl'
-							control={control}
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className='text-base font-medium text-gray-700'>
-										Page URL
-									</FormLabel>
-									<FormControl>
-										<Input
-											{...field}
-											placeholder='Enter page URL'
-											className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-										/>
-									</FormControl>
-									{errors.pageUrl && (
-										<FormMessage>{errors.pageUrl.message}</FormMessage>
-									)}
-								</FormItem>
-							)}
-						/>
-					</div> */}
 
 					<div className='mb-4'>
 						<FormField

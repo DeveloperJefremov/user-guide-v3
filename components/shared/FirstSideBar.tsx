@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import { FC } from 'react';
 
 interface ButtonElement {
@@ -24,69 +25,23 @@ interface IconElement {
 	onClick: () => void;
 }
 
-type Element = ButtonElement | LinkElement | IconElement; // Универсальный тип для элементов
+type Element = ButtonElement | LinkElement | IconElement;
 
 const FirstSideBar: FC = () => {
+	const router = useRouter();
+
 	const elements: Element[] = [
 		{
-			id: 'btn-1',
+			id: 'btn-features',
 			type: 'button',
-			label: 'Button 1',
-			onClick: () => alert('Button 1 clicked'),
+			label: 'Features',
+			onClick: () => router.push('/features'),
 		},
 		{
-			id: 'link-1',
-			type: 'link',
-			label: 'Link 1',
-			href: '#',
-			target: '_blank',
-		},
-		{
-			id: 'icon-1',
-			type: 'icon',
-			icon: '🔍',
-			label: 'Search',
-			onClick: () => alert('Search clicked'),
-		},
-		{
-			id: 'btn-2',
+			id: 'btn-prices',
 			type: 'button',
-			label: 'Button 2',
-			onClick: () => alert('Button 2 clicked'),
-		},
-		{ id: 'link-2', type: 'link', label: 'Link 2', href: '#', target: '_self' },
-		{
-			id: 'icon-2',
-			type: 'icon',
-			icon: '📈',
-			label: 'Stats',
-			onClick: () => alert('Stats clicked'),
-		},
-		{
-			id: 'btn-3',
-			type: 'button',
-			label: 'Button 3',
-			onClick: () => alert('Button 3 clicked'),
-		},
-		{
-			id: 'link-3',
-			type: 'link',
-			label: 'Link 3',
-			href: '#',
-			target: '_blank',
-		},
-		{
-			id: 'icon-3',
-			type: 'icon',
-			icon: '⚙️',
-			label: 'Settings',
-			onClick: () => alert('Settings clicked'),
-		},
-		{
-			id: 'btn-4',
-			type: 'button',
-			label: 'Button 4',
-			onClick: () => alert('Button 4 clicked'),
+			label: 'Prices',
+			onClick: () => router.push('/prices'),
 		},
 	];
 
@@ -97,30 +52,13 @@ const FirstSideBar: FC = () => {
 				{elements.map(element => (
 					<div key={element.id}>
 						{element.type === 'button' && (
-							<button id={element.id} onClick={element.onClick}>
-								{element.label}
-							</button>
-						)}
-						{element.type === 'link' && (
-							<a
-								id={element.id}
-								href={element.href}
-								target={element.target}
-								rel='noopener noreferrer'
-								className='text-primary underline'
-							>
-								{element.label}
-							</a>
-						)}
-						{element.type === 'icon' && (
-							<div
+							<button
 								id={element.id}
 								onClick={element.onClick}
-								className='flex items-center cursor-pointer'
+								className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
 							>
-								<span className='text-xl'>{element.icon}</span>{' '}
-								<span className='ml-2'>{element.label}</span>
-							</div>
+								{element.label}
+							</button>
 						)}
 					</div>
 				))}
