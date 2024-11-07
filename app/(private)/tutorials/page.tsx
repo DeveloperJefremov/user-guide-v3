@@ -6,13 +6,13 @@ import GuideSetList from '@/pages/UserGuide/ui';
 interface Props {
 	className?: string;
 }
-const Home = ({ className }: Props) => {
+const Tutorials = ({ className }: Props) => {
 	return (
 		<div className='grid grid-rows-[100vh_1fr] grid-cols-[150px_1fr] h-screen'>
 			<FirstSideBar />
-			{/* <GuideSetList /> */}
+			<GuideSetList />
 		</div>
 	);
 };
 
-export default Home;
+export default Tutorials;
