@@ -34,13 +34,6 @@ model Set {
   userId Int?
 }
 
-enum Status {
-  EMPTY
-  DRAFT
-  UNDER_REVIEW
-  COMPLETED
-}
-
 model Step {
   id           Int      @id @default(autoincrement())
   setId        Int // Внешний ключ на модель Set
@@ -61,6 +54,20 @@ model Step {
   @@index([setId])
 }
 
+model Url {
+  id          Int               @id @default(autoincrement())
+  url         String
+  description String
+  validFrom   DateTime
+  validTo     DateTime
+  status      UrlCategoryStatus
+  // userId      String
+  // user        User              @relation(fields: [userId], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  // @@map("user_tags")
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -77,4 +84,19 @@ model User {
 enum Role {
   ADMIN
   USER
+}
+
+enum Status {
+  EMPTY
+  DRAFT
+  UNDER_REVIEW
+  COMPLETED
+}
+
+enum UrlCategoryStatus {
+  ACTIVE
+  INACTIVE
+  HIDDEN
+  ARCHIVED
+  INITIAL
 }

@@ -32,6 +32,18 @@ const FirstSideBar: FC = () => {
 
 	const elements: Element[] = [
 		{
+			id: 'btn-home',
+			type: 'button',
+			label: 'Home',
+			onClick: () => router.push('/'),
+		},
+		{
+			id: 'btn-tutorials',
+			type: 'button',
+			label: 'Tutorials',
+			onClick: () => router.push('/tutorials'),
+		},
+		{
 			id: 'btn-features',
 			type: 'button',
 			label: 'Features',

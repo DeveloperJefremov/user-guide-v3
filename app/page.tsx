@@ -1,7 +1,6 @@
 // import LandingPage from './(logged-out)/page';
 
 import FirstSideBar from '@/components/shared/FirstSideBar';
-import GuideSetList from '@/pages/UserGuide/ui';
 
 interface Props {
 	className?: string;

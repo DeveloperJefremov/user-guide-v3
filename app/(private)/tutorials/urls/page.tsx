@@ -1,7 +1,10 @@
-import React from 'react';
-
+import UrlsDashboard from '@/pages/Urls/ui/UrlsDashboard';
 const Urls = () => {
-	return <div>Urls</div>;
+	return (
+		<>
+			<UrlsDashboard />
+		</>
+	);
 };
 
 export default Urls;

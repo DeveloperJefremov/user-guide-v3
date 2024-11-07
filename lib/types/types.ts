@@ -63,3 +63,23 @@ export interface Step {
 	updatedAt: Date;
 	// set?: Set;
 }
+
+export interface Url {
+	id: number;
+	url: string;
+	description: string;
+	validFrom: Date;
+	validTo: Date;
+	status: UrlCategoryStatus;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+// Перечисление для статуса Url
+export enum UrlCategoryStatus {
+	ACTIVE,
+	INACTIVE,
+	HIDDEN,
+	ARCHIVED,
+	INITIAL,
+}

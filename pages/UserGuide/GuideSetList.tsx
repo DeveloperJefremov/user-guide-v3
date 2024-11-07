@@ -6,6 +6,7 @@ import { SetWithSteps } from '@/lib/types/types';
 import { Status } from '@prisma/client';
 import { deleteObject, ref } from 'firebase/storage';
 import { Reorder } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { deleteSet, getGuideSets, updateSetsOrder } from './data/set';
 import { GuideSet } from './ui/Set/GuideSet';
@@ -18,6 +19,7 @@ export const GuideSetList = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedSet, setSelectedSet] = useState<SetWithSteps | null>(null);
 	const [filterStatus, setFilterStatus] = useState<Status | 'ALL'>('ALL'); // Начальный статус - "ALL"
+	const router = useRouter();
 
 	async function fetchSets() {
 		try {
@@ -131,7 +133,12 @@ export const GuideSetList = () => {
 		<div className='border p-5 m-8 overflow-auto'>
 			<div className='flex justify-between items-center'>
 				<h1>Tutorial List:</h1>
-				<Button onClick={() => setIsModalOpen(true)}>Add Tutorial</Button>
+				<div className='flex space-x-2'>
+					<Button onClick={() => router.push('/tutorials/urls')}>
+						Add Url
+					</Button>
+					<Button onClick={() => setIsModalOpen(true)}>Add Tutorial</Button>
+				</div>
 			</div>
 
 			{/* Фильтр по статусам */}
