@@ -107,15 +107,34 @@ const UrlCreateForm = ({ onUrlCreated, onCancel, url }: Props) => {
 					)}
 				/>
 
-				<div className='flex flex-col gap-3'>
-					<Label>Description</Label>
-					{/* <ListTextarea
-						value={form.watch('description') ?? []}
-						onChange={newValue => {
-							form.setValue('description', newValue);
-						}}
-					/> */}
-				</div>
+				<FormField
+					control={form.control}
+					name='description'
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel className='pl-[2px]'>Description</FormLabel>
+							<FormControl>
+								<textarea
+									className='text-base mt-[5px] w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+									{...field}
+									value={(field.value ?? []).map(item => item.value).join(', ')}
+									onChange={e =>
+										form.setValue(
+											'description',
+											e.target.value.split(',').map((value, index) => ({
+												id: Math.random(), // Или другой уникальный id
+												value: value.trim(),
+												order: index,
+											}))
+										)
+									}
+									placeholder='Enter descriptions separated by commas'
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
 				<div className='flex flex-col gap-1'>
 					<Label className='py-2'>Valid Time </Label>
@@ -218,10 +237,6 @@ const UrlCreateForm = ({ onUrlCreated, onCancel, url }: Props) => {
 				{/* <DevTool control={form.control} /> */}
 
 				<div className='flex gap-3 w-full'>
-					<Button variant='outline' type='submit' className='w-full'>
-						{url ? 'Save' : 'Create'}
-					</Button>
-
 					<Button
 						variant='outline'
 						type='button'
@@ -229,6 +244,10 @@ const UrlCreateForm = ({ onUrlCreated, onCancel, url }: Props) => {
 						onClick={() => onCancel()}
 					>
 						Cancel
+					</Button>
+
+					<Button variant='outline' type='submit' className='w-full'>
+						{url ? 'Save' : 'Create'}
 					</Button>
 				</div>
 				{/* {Object.keys(form.formState.errors).map(

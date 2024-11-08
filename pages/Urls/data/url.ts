@@ -1,3 +1,4 @@
+'use server';
 import { prisma } from '@/prisma/prisma-client';
 import { Url } from '../types/types';
 
@@ -87,60 +88,3 @@ export async function fetchUrls() {
 		throw new Error('Ошибка при получении списка URL');
 	}
 }
-
-// import { prisma } from '@/prisma/prisma-client';
-// import { Prisma, Url } from '@prisma/client';
-
-// // Экшен для получения всех URL-ов
-// export const fetchUrls = async (): Promise<Url[]> => {
-// 	try {
-// 		const urls = await prisma.url.findMany();
-// 		return urls;
-// 	} catch (error) {
-// 		console.error('Error fetching URLs:', error);
-// 		throw new Error('Failed to fetch URLs');
-// 	}
-// };
-// // Экшен для создания нового URL
-// export const createUrl = async (
-// 	data: Omit<Prisma.UrlCreateInput, 'id'>
-// ): Promise<Url> => {
-// 	try {
-// 		const newUrl = await prisma.url.create({
-// 			data,
-// 		});
-// 		return newUrl;
-// 	} catch (error) {
-// 		console.error('Error creating URL:', error);
-// 		throw new Error('Failed to create URL');
-// 	}
-// };
-
-// // Экшен для удаления URL по ID
-// export const deleteUrl = async (id: number): Promise<void> => {
-// 	try {
-// 		await prisma.url.delete({
-// 			where: { id },
-// 		});
-// 	} catch (error) {
-// 		console.error('Error deleting URL:', error);
-// 		throw new Error('Failed to delete URL');
-// 	}
-// };
-
-// // Экшен для редактирования (обновления) URL
-// export const editUrl = async (
-// 	id: number,
-// 	data: Prisma.UrlUpdateInput
-// ): Promise<Url> => {
-// 	try {
-// 		const updatedUrl = await prisma.url.update({
-// 			where: { id },
-// 			data,
-// 		});
-// 		return updatedUrl;
-// 	} catch (error) {
-// 		console.error('Error updating URL:', error);
-// 		throw new Error('Failed to update URL');
-// 	}
-// };

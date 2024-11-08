@@ -11,36 +11,32 @@ const UrlsDashboard = () => {
 	const [isShownForm, setIsShownForm] = useState(false);
 	const [urls, setUrls] = useState<Url[]>([]);
 
-	// useEffect(() => {
-	// 	let isMounted = true;
-	// 	if (!tags) {
-	// 		fetchUrls(() => isMounted);
-	// 	}
-	// 	return () => {
-	// 		isMounted = false;
-	// 	};
-	// }, []);
-
 	useEffect(() => {
 		const loadUrls = async () => {
 			const fetchedUrls = await fetchUrls();
+
 			setUrls(fetchedUrls);
 		};
-
 		loadUrls();
 	}, []);
 
-	const createUrlTagHandler = (newTag: Url) => {
+	const createUrlTagHandler = async (newTag: Url) => {
 		setIsShownForm(false);
-		createUrl(newTag);
+		await createUrl(newTag);
+		const updatedUrls = await fetchUrls();
+		setUrls(updatedUrls);
 	};
 
-	const deleteUrlHandler = (id: number) => {
-		deleteUrl(id);
+	const deleteUrlHandler = async (id: number) => {
+		await deleteUrl(id); // Удаляем URL
+		const updatedUrls = await fetchUrls(); // Загружаем актуальный список
+		setUrls(updatedUrls); // Обновляем состояние
 	};
 
-	const updateUrlHandler = (updatedTag: Url) => {
-		editUrl(updatedTag);
+	const updateUrlHandler = async (updatedTag: Url) => {
+		await editUrl(updatedTag); // Обновляем URL в базе данных
+		const updatedUrls = await fetchUrls(); // Загружаем актуальный список
+		setUrls(updatedUrls); // Обновляем состояние
 	};
 
 	return (
@@ -81,7 +77,7 @@ const UrlsDashboard = () => {
 						<CardHeader>
 							<CardTitle>Urls</CardTitle>
 						</CardHeader>
-						tags
+
 						<CardContent className='flex flex-col items-start gap-6'>
 							{urls !== null && !!urls.length ? (
 								<ul className='flex flex-col gap-4'>
