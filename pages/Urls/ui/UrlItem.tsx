@@ -4,6 +4,7 @@ import DeleteButton from '@/components/shared/DeleteButton';
 import { Button } from '@/components/ui/button';
 import { PencilIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
+import { useIframe } from '../context/IframeContext';
 import { Url } from '../types/types';
 import UrlCreateForm from './UrlCreateForm';
 
@@ -14,7 +15,7 @@ interface Props {
 }
 const UrlItem = ({ url, onUrlChange, onUrlDelete }: Props) => {
 	const [editingUrl, setEditingUrl] = useState<boolean>(false);
-
+	const { setIframeUrl } = useIframe();
 	const saveUrlHandler = (newUrl: Url): void => {
 		onUrlChange(newUrl);
 		setEditingUrl(false);
@@ -52,6 +53,14 @@ const UrlItem = ({ url, onUrlChange, onUrlDelete }: Props) => {
 					<span className=' flex items-center  text-center text-xl '>
 						{url.url}
 					</span>
+					<Button
+						onClick={() => setIframeUrl(url.url)}
+						variant='outline'
+						size='sm'
+						className='ml-auto'
+					>
+						View in iframe
+					</Button>
 				</>
 			) : (
 				<UrlCreateForm
