@@ -12,7 +12,7 @@ export async function createUrl(data: Url) {
 		const newUrl = await prisma.url.create({
 			data: {
 				url: data.url,
-				description: JSON.stringify(data.description), // Сериализация description
+				description: data.description ?? [],
 				validFrom: data.validFrom,
 				validTo: data.validTo,
 				status: data.status,
@@ -57,7 +57,7 @@ export async function editUrl(data: Url) {
 			},
 			data: {
 				url: data.url,
-				description: JSON.stringify(data.description), // Сериализация description
+				description: data.description ?? [],
 				validFrom: data.validFrom,
 				validTo: data.validTo,
 				status: data.status,
@@ -78,10 +78,13 @@ export async function fetchUrls() {
 	try {
 		const urls = await prisma.url.findMany();
 
-		// Десериализация description из JSON-строки в массив объектов
+		// Десериализуем `description` в массив объектов
 		return urls.map(url => ({
 			...url,
-			description: url.description ? JSON.parse(url.description) : null,
+			description:
+				typeof url.description === 'string'
+					? JSON.parse(url.description)
+					: url.description, // Преобразуем только если это строка
 		}));
 	} catch (error) {
 		console.error('Ошибка при получении списка URL:', error);

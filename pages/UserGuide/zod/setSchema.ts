@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 export const createSetSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
-	pageUrl: z.string().min(1, 'Page URL is required').url('Invalid URL'), // Добавляем поле pageUrl
+	pageUrlId: z.number().int().optional(),
 	status: z.nativeEnum(Status),
 	isCompleted: z.boolean().optional(),
 });

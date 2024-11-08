@@ -13,6 +13,7 @@ export async function getGuideSets(): Promise<SetWithSteps[]> {
 			order: 'asc', // Упорядочиваем сеты по полю `order`
 		},
 		include: {
+			pageUrl: true,
 			steps: {
 				orderBy: {
 					order: 'asc', // Упорядочиваем степы по полю `order`
@@ -20,7 +21,18 @@ export async function getGuideSets(): Promise<SetWithSteps[]> {
 			}, // Если вам нужны связанные шаги
 		},
 	});
-	return sets;
+	return sets.map(set => ({
+		...set,
+		pageUrl: set.pageUrl
+			? {
+					...set.pageUrl,
+					description:
+						typeof set.pageUrl.description === 'string'
+							? JSON.parse(set.pageUrl.description) // Десериализуем, если это строка
+							: set.pageUrl.description,
+			  }
+			: null,
+	}));
 }
 
 export async function createSet(data: SetWithSteps): Promise<SetWithSteps> {
@@ -33,7 +45,9 @@ export async function createSet(data: SetWithSteps): Promise<SetWithSteps> {
 	const newSet = await prisma.set.create({
 		data: {
 			title: parsedData.data.title,
-			pageUrl: parsedData.data.pageUrl,
+			pageUrl: parsedData.data.pageUrlId
+				? { connect: { id: parsedData.data.pageUrlId } }
+				: undefined, // Связываем по ID
 			// userId: 1,
 			status: parsedData.data.status,
 			isCompleted: parsedData.data.isCompleted || false,
@@ -77,7 +91,9 @@ export async function updateSet(
 			data: {
 				title: parsedData.data.title,
 				status: parsedData.data.status,
-				pageUrl: parsedData.data.pageUrl,
+				pageUrl: parsedData.data.pageUrlId
+					? { connect: { id: parsedData.data.pageUrlId } }
+					: undefined, // Связываем по ID, если `pageUrlId` присутствует
 				isCompleted: parsedData.data.isCompleted || false,
 			},
 			include: {

@@ -9,7 +9,15 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import { useLocalStorage } from '@/lib/hooks/useLocaleStorage';
+import { useUrlStore } from '@/lib/store/zustand/url-store';
 import { SetWithSteps } from '@/pages/UserGuide/types/types';
 import {
 	CreateSetInput,
@@ -18,7 +26,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Set as SetModel, Status } from '@prisma/client';
 import React, { useEffect, useRef, useState } from 'react';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { createSet, updateSet } from '../../data/set';
 import { Modal } from '../../shared/Modal';
 import { StatusSelector } from './StatusSelector';
@@ -44,23 +52,28 @@ export function SetModal({
 	);
 	const localStorageKey = isEditing ? `editSet_${initialData?.id}` : 'newSet';
 
-	// Инициализация всех данных формы в localStorage
+	// Zustand store
+	const { urls, fetchUrls } = useUrlStore();
+
+	// Load URLs when the modal opens
+	useEffect(() => {
+		if (isOpen) {
+			fetchUrls();
+		}
+	}, [isOpen, fetchUrls]);
+
+	// Initialize form data with localStorage
 	const [setData, setSetData, removeSetData] = useLocalStorage<CreateSetInput>(
 		localStorageKey,
 		isEditing && initialData
 			? {
 					title: initialData.title,
-					pageUrl: initialData.pageUrl,
+					pageUrlId: initialData.pageUrlId ?? 0,
 					status: initialData.status || Status.DRAFT,
 			  }
-			: {
-					title: '',
-					status: Status.DRAFT,
-					pageUrl: '',
-			  }
+			: { title: '', status: Status.DRAFT, pageUrlId: 0 }
 	);
 
-	// Используем setData для defaultValues в useForm
 	const methods = useForm<CreateSetInput>({
 		resolver: zodResolver(createSetSchema),
 		defaultValues: setData,
@@ -86,7 +99,6 @@ export function SetModal({
 		}
 	}, [isOpen]);
 
-	// Отслеживаем изменения всех полей и обновляем setData
 	useEffect(() => {
 		if (isOpen) {
 			const subscription = methods.watch(data => {
@@ -94,17 +106,46 @@ export function SetModal({
 					...data,
 					title: data.title || '',
 					status: data.status || Status.DRAFT,
-					pageUrl: data.pageUrl || '',
+					pageUrl: data.pageUrlId || '',
 				};
 				setIsToggleOn(initialData?.isCompleted || false);
-				setSetData(validatedData); // Сохраняем все поля в localStorage
+				setSetData(validatedData); // Save all fields to localStorage
 			});
 			return () => subscription.unsubscribe();
 		}
 	}, [methods, setSetData, isOpen]);
 
+	// const onSubmit = async (data: CreateSetInput) => {
+	// 	try {
+	// 		const dataWithDefaults: SetWithSteps = {
+	// 			...data,
+	// 			id: 0,
+	// 			order: 0,
+	// 			createdAt: new Date(),
+	// 			updatedAt: new Date(),
+	// 			userId: 0,
+	// 			steps: [],
+	// 			isCompleted: isToggleOn,
+	// 			pageUrlId: data.pageUrlId ?? null,
+	// 		};
+
+	// 		if (isEditing && initialData) {
+	// 			const updatedSet = await updateSet(initialData.id, dataWithDefaults);
+	// 			// debugger;
+	// 			onSetUpdated(updatedSet);
+	// 		} else {
+	// 			const newSet = await createSet(dataWithDefaults);
+	// 			onSetCreated(newSet);
+	// 		}
+	// 		removeSetData();
+	// 		onClose();
+	// 	} catch (error) {
+	// 		console.error('Error creating/updating set:', error);
+	// 	}
+	// };
 	const onSubmit = async (data: CreateSetInput) => {
 		try {
+			// Обновляем данные с новыми значениями по умолчанию
 			const dataWithDefaults: SetWithSteps = {
 				...data,
 				id: 0,
@@ -114,15 +155,26 @@ export function SetModal({
 				userId: 0,
 				steps: [],
 				isCompleted: isToggleOn,
+				pageUrlId: data.pageUrlId ?? null,
 			};
 
+			let updatedSet: SetWithSteps;
+
 			if (isEditing && initialData) {
-				const updatedSet = await updateSet(initialData.id, dataWithDefaults);
+				const result = await updateSet(initialData.id, dataWithDefaults);
+				const updatedPageUrl =
+					urls.find(url => url.id === data.pageUrlId) || null;
+				// Добавляем поле steps как пустой массив
+				updatedSet = { ...result, steps: [], pageUrl: updatedPageUrl };
 				onSetUpdated(updatedSet);
 			} else {
-				const newSet = await createSet(dataWithDefaults);
-				onSetCreated(newSet);
+				const result = await createSet(dataWithDefaults);
+				const newPageUrl = urls.find(url => url.id === data.pageUrlId) || null;
+				// Добавляем поле steps как пустой массив
+				updatedSet = { ...result, steps: [], pageUrl: newPageUrl };
+				onSetCreated(updatedSet);
 			}
+
 			removeSetData();
 			onClose();
 		} catch (error) {
@@ -170,7 +222,7 @@ export function SetModal({
 
 					<div className='mb-4'>
 						<FormField
-							name='pageUrl'
+							name='pageUrlId'
 							control={control}
 							render={({ field }) => (
 								<FormItem>
@@ -178,14 +230,24 @@ export function SetModal({
 										Page URL
 									</FormLabel>
 									<FormControl>
-										<Input
-											{...field}
-											placeholder='Enter page URL'
-											className='mt-2 w-full border border-gray-300 rounded-md p-3 text-lg'
-										/>
+										<Select
+											onValueChange={value => field.onChange(Number(value))} // Преобразуем значение в число
+											value={field.value ? field.value.toString() : ''} // Убедитесь, что `value` всегда строка
+										>
+											<SelectTrigger>
+												<SelectValue placeholder='Select a URL' />
+											</SelectTrigger>
+											<SelectContent>
+												{urls.map(url => (
+													<SelectItem key={url.id} value={url.id.toString()}>
+														{url.url}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 									</FormControl>
-									{errors.pageUrl && (
-										<FormMessage>{errors.pageUrl.message}</FormMessage>
+									{errors.pageUrlId && (
+										<FormMessage>{errors.pageUrlId.message}</FormMessage>
 									)}
 								</FormItem>
 							)}
@@ -200,14 +262,11 @@ export function SetModal({
 								<FormItem>
 									<FormLabel>Status</FormLabel>
 									<StatusSelector
-										// initialData={initialData}
 										currentStatus={field.value as Status}
 										onChangeStatus={field.onChange}
 										isEditing={isEditing}
 										isToggleOn={isToggleOn}
 										setIsToggleOn={setIsToggleOn}
-
-										// onToggleStatusChange={isOn => setIsToggleOn(isOn)}
 									/>
 									{errors.status && (
 										<FormMessage className='text-red-500 text-sm mt-2'>

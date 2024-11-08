@@ -2,15 +2,21 @@ import { Button } from '@/components/ui/button';
 import { Set, Status } from '@prisma/client';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 import React from 'react';
-import { updateSetStatus } from '../../data/set';
 import { StatusBadge } from './StatusBadge';
-import { StatusSelector } from './StatusSelector';
 
 interface SetHeaderProps {
 	setTitle: string;
 	setId: number;
 	status: Status;
-	pageUrl: string; // Добавляем pageUrl
+	pageUrl?: {
+		// делаем `pageUrl` необязательным объектом
+		status: 'ACTIVE' | 'INACTIVE' | 'HIDDEN' | 'ARCHIVED' | 'INITIAL';
+		id: number;
+		url: string;
+		description: { id: number; value: string; order: number }[] | null;
+		validFrom: Date;
+		validTo: Date;
+	} | null;
 	onDelete: (id: number) => void;
 	onEdit: (set: Set) => void;
 	isCompleted?: boolean;
@@ -34,7 +40,7 @@ export const SetHeader = ({
 		onEdit({
 			id: setId,
 			title: setTitle,
-			pageUrl: pageUrl,
+			pageUrlId: pageUrl?.id || null,
 			status: status,
 			order: 0,
 			createdAt: new Date(),
@@ -62,7 +68,7 @@ export const SetHeader = ({
 					<h2 className='text-xl font-bold mr-3'>{setTitle}</h2>
 					<StatusBadge status={status} isToggleOn={isCompleted ?? false} />
 				</div>
-				<p className='text-sm text-gray-500 mt-2'>{pageUrl}</p>
+				{pageUrl && <p className='text-sm text-gray-500 mt-2'>{pageUrl.url}</p>}
 			</div>
 			<div className='flex space-x-2'>
 				<Button variant='default' onClick={handleEdit}>

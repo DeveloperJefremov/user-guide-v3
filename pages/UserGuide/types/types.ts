@@ -1,5 +1,6 @@
 // types.ts
 
+import { Url } from '@/pages/Urls/types/types';
 import { Status } from '@prisma/client';
 
 // Перечисления
@@ -32,18 +33,20 @@ import { Status } from '@prisma/client';
 export interface Set {
 	id: number;
 	title: string;
-	pageUrl: string;
+	pageUrlId: number | null; // Внешний ключ на Url
 	status: Status;
 	isCompleted: boolean;
 	order: number;
 	createdAt: Date;
 	updatedAt: Date;
 	userId: number | null;
-	// user?: User;
+	url?: Url; // Связанный объект Url
+	pageUrl?: Url | null;
 }
 
 export interface SetWithSteps extends Set {
 	steps: Step[];
+	pageUrl?: Url | null;
 }
 
 // Интерфейс для модели Step

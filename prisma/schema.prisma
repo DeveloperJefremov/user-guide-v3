@@ -17,13 +17,12 @@ datasource db {
 model Set {
   id          Int      @id @default(autoincrement())
   title       String   @db.VarChar(255)
-  pageUrl     String
+  pageUrlId   Int? // Внешний ключ на модель Url
   status      Status   @default(EMPTY)
   isCompleted Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   order       Int      @default(0)
-
   // userId Int
   // user   User @relation(fields: [userId], references: [id])
 
@@ -31,7 +30,8 @@ model Set {
 
   // @@unique([userId, title])
   // User   User? @relation(fields: [userId], references: [id])
-  userId Int?
+  pageUrl Url? @relation(name: "UrlToSet", fields: [pageUrlId], references: [id], onDelete: SetNull) // Отношение с моделью Url
+  userId  Int? // Поле для связи с моделью User (если понадобится)
 }
 
 model Step {
@@ -57,7 +57,7 @@ model Step {
 model Url {
   id          Int               @id @default(autoincrement())
   url         String
-  description String
+  description Json
   validFrom   DateTime
   validTo     DateTime
   status      UrlCategoryStatus
@@ -66,6 +66,7 @@ model Url {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   // @@map("user_tags")
+  Set         Set[]             @relation(name: "UrlToSet") // Отношение с моделью Set
 }
 
 model User {
